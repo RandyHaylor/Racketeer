@@ -1,0 +1,197 @@
+Using pre-set license
+Built from '2020.3/release' branch; Version is '2020.3.2f1 (8fd9074bf66c) revision 9427207'; Using compiler version '192528614'; Build Type 'Release'
+OS: 'Windows 10 Pro; OS build 19042.867; Version 2009; 64bit' Language: 'en' Physical Memory: 16324 MB
+BatchMode: 1, IsHumanControllingUs: 0, StartBugReporterOnCrash: 0, Is64bit: 1, IsPro: 0
+
+ COMMAND LINE ARGUMENTS:
+H:\UnityInstall\2020.3.2f1\Editor\Unity.exe
+-adb2
+-batchMode
+-noUpm
+-name
+AssetImportWorker0
+-projectPath
+H:/_Lumberjacked/MultiplayerFPSTutorialMirror/Mirror/Racketeer_MP_Game_GIt/Racketeer/RacketeerUnityProject
+-logFile
+Logs/AssetImportWorker0.log
+-srvPort
+5344
+Successfully changed project path to: H:/_Lumberjacked/MultiplayerFPSTutorialMirror/Mirror/Racketeer_MP_Game_GIt/Racketeer/RacketeerUnityProject
+H:/_Lumberjacked/MultiplayerFPSTutorialMirror/Mirror/Racketeer_MP_Game_GIt/Racketeer/RacketeerUnityProject
+Using Asset Import Pipeline V2.
+Refreshing native plugins compatible for Editor in 83.97 ms, found 0 plugins.
+Preloading 0 native plugins for Editor in 0.00 ms.
+Initialize engine version: 2020.3.2f1 (8fd9074bf66c)
+[Subsystems] Discovering subsystems at path H:/UnityInstall/2020.3.2f1/Editor/Data/Resources/UnitySubsystems
+[Subsystems] Discovering subsystems at path H:/_Lumberjacked/MultiplayerFPSTutorialMirror/Mirror/Racketeer_MP_Game_GIt/Racketeer/RacketeerUnityProject/Assets
+GfxDevice: creating device client; threaded=0
+Direct3D:
+    Version:  Direct3D 11.0 [level 11.1]
+    Renderer: NVIDIA GeForce GTX 980 Ti (ID=0x17c8)
+    Vendor:   
+    VRAM:     6097 MB
+    Driver:   27.21.14.6192
+Initialize mono
+Mono path[0] = 'H:/UnityInstall/2020.3.2f1/Editor/Data/Managed'
+Mono path[1] = 'H:/UnityInstall/2020.3.2f1/Editor/Data/MonoBleedingEdge/lib/mono/unityjit'
+Mono config path = 'H:/UnityInstall/2020.3.2f1/Editor/Data/MonoBleedingEdge/etc'
+Using monoOptions --debugger-agent=transport=dt_socket,embedding=1,server=y,suspend=n,address=127.0.0.1:56660
+Begin MonoManager ReloadAssembly
+Registering precompiled unity dll's ...
+Register platform support module: H:/UnityInstall/2020.3.2f1/Editor/Data/PlaybackEngines/WebGLSupport/UnityEditor.WebGL.Extensions.dll
+Register platform support module: H:/UnityInstall/2020.3.2f1/Editor/Data/PlaybackEngines/WindowsStandaloneSupport/UnityEditor.WindowsStandalone.Extensions.dll
+Registered in 0.002331 seconds.
+Native extension for WindowsStandalone target not found
+Native extension for WebGL target not found
+Refreshing native plugins compatible for Editor in 34.20 ms, found 0 plugins.
+Preloading 0 native plugins for Editor in 0.00 ms.
+Invoked RoslynAnalysisRunner static constructor.
+RoslynAnalysisRunner will not be running.
+RoslynAnalysisRunner has terminated.
+Mono: successfully reloaded assembly
+- Completed reload, in  4.121 seconds
+Platform modules already initialized, skipping
+Registering precompiled user dll's ...
+Registered in 0.003610 seconds.
+Begin MonoManager ReloadAssembly
+Native extension for WindowsStandalone target not found
+Native extension for WebGL target not found
+Refreshing native plugins compatible for Editor in 0.37 ms, found 0 plugins.
+Preloading 0 native plugins for Editor in 0.00 ms.
+Invoked RoslynAnalysisRunner static constructor.
+RoslynAnalysisRunner will not be running.
+RoslynAnalysisRunner has terminated.
+Find all reader and writers took 114 milliseconds
+Script Module: UnityEngine.UI.dll
+Weave behaviours and messages took109 milliseconds
+Find all reader and writers took 76 milliseconds
+Script Module: UnityEngine.TestRunner.dll
+Weave behaviours and messages took26 milliseconds
+Find all reader and writers took 75 milliseconds
+Script Module: SimpleWebTransport.dll
+Weave behaviours and messages took7 milliseconds
+Find all reader and writers took 71 milliseconds
+Script Module: Unity.Timeline.dll
+Weave behaviours and messages took38 milliseconds
+Find all reader and writers took 96 milliseconds
+Script Module: Unity.TextMeshPro.dll
+Weave behaviours and messages took95 milliseconds
+Find all reader and writers took 62 milliseconds
+Script Module: Telepathy.dll
+Weave behaviours and messages took7 milliseconds
+Find all reader and writers took 76 milliseconds
+Script Module: kcp2k.dll
+Weave behaviours and messages took6 milliseconds
+Find all reader and writers took 73 milliseconds
+Script Module: Mirror.Examples.Cloud.GUI.dll
+Weave behaviours and messages took7 milliseconds
+Find all reader and writers took 76 milliseconds
+Script Module: Mirror.Cloud.dll
+Weave behaviours and messages took3 milliseconds
+Find all reader and writers took 102 milliseconds
+Script Module: UnityEditor.TestRunner.dll
+Weave behaviours and messages took50 milliseconds
+Find all reader and writers took 99 milliseconds
+Script Module: UnityEditor.UI.dll
+Weave behaviours and messages took20 milliseconds
+Find all reader and writers took 131 milliseconds
+Script Module: ParrelSync.dll
+Weave behaviours and messages took2 milliseconds
+Find all reader and writers took 75 milliseconds
+Script Module: Mirror.CompilerSymbols.dll
+Weave behaviours and messages took0 milliseconds
+Mono: successfully reloaded assembly
+- Completed reload, in  5.064 seconds
+Platform modules already initialized, skipping
+========================================================================
+Worker process is ready to serve import requests
+Launched and connected shader compiler UnityShaderCompiler.exe after 0.05 seconds
+Refreshing native plugins compatible for Editor in 0.35 ms, found 0 plugins.
+Preloading 0 native plugins for Editor in 0.00 ms.
+Unloading 1389 Unused Serialized files (Serialized files now loaded: 0)
+System memory in use before: 66.2 MB.
+System memory in use after: 66.3 MB.
+
+Unloading 15 unused Assets to reduce memory usage. Loaded Objects now: 1829.
+Total: 2.873969 ms (FindLiveObjects: 0.250102 ms CreateObjectMapping: 0.066349 ms MarkObjects: 2.463930 ms  DeleteObjects: 0.086254 ms)
+
+========================================================================
+Received Import Request.
+  path: Assets/AudioMixer.mixer
+  artifactKey: Guid(626190e3b6e78e741bb5aac554acc24f) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/AudioMixer.mixer using Guid(626190e3b6e78e741bb5aac554acc24f) Importer(815301076,1909f56bfc062723c751e8b465ee728b)  -> (artifact id: 'ae275794108a500deed3985fa387bfca') in 0.054477 seconds
+  Import took 0.057811 seconds .
+
+========================================================================
+Received Import Request.
+  Time since last request: 515.317227 seconds.
+  path: Assets/CasualGameSounds/DM-CGS-03.wav
+  artifactKey: Guid(19f89c6e740e7447f9e12a8310d3e973) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/CasualGameSounds/DM-CGS-03.wav using Guid(19f89c6e740e7447f9e12a8310d3e973) Importer(815301076,1909f56bfc062723c751e8b465ee728b)  -> (artifact id: '3fd0707ef2ea2b30692d6041cee05cc6') in 0.195845 seconds
+  Import took 0.199299 seconds .
+
+========================================================================
+Received Import Request.
+  Time since last request: 0.000225 seconds.
+  path: Assets/CasualGameSounds/DM-CGS-34.wav
+  artifactKey: Guid(881e3f52c86c94f26a60718d35627cd8) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/CasualGameSounds/DM-CGS-34.wav using Guid(881e3f52c86c94f26a60718d35627cd8) Importer(815301076,1909f56bfc062723c751e8b465ee728b)  -> (artifact id: 'c84fd2235e7909f40a90250835594180') in 0.093704 seconds
+  Import took 0.099668 seconds .
+
+========================================================================
+Received Import Request.
+  Time since last request: 0.000245 seconds.
+  path: Assets/CasualGameSounds/DM-CGS-03.wav
+  artifactKey: Guid(19f89c6e740e7447f9e12a8310d3e973) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/CasualGameSounds/DM-CGS-03.wav using Guid(19f89c6e740e7447f9e12a8310d3e973) Importer(815301076,1909f56bfc062723c751e8b465ee728b)  -> (artifact id: '3fd0707ef2ea2b30692d6041cee05cc6') in 0.026521 seconds
+  Import took 0.030810 seconds .
+
+========================================================================
+Received Import Request.
+  Time since last request: 0.000681 seconds.
+  path: Assets/CasualGameSounds/DM-CGS-34.wav
+  artifactKey: Guid(881e3f52c86c94f26a60718d35627cd8) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/CasualGameSounds/DM-CGS-34.wav using Guid(881e3f52c86c94f26a60718d35627cd8) Importer(815301076,1909f56bfc062723c751e8b465ee728b)  -> (artifact id: 'c84fd2235e7909f40a90250835594180') in 0.029306 seconds
+  Import took 0.036378 seconds .
+
+========================================================================
+Received Import Request.
+  Time since last request: 10.200036 seconds.
+  path: Assets/Scenes/Main.unity
+  artifactKey: Guid(9fc0d4010bbf28b4594072e72b8655ab) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Scenes/Main.unity using Guid(9fc0d4010bbf28b4594072e72b8655ab) Importer(815301076,1909f56bfc062723c751e8b465ee728b)  -> (artifact id: 'b1c47dbad8a3f6a0e77cdcc4e2414a68') in 0.016111 seconds
+  Import took 0.021536 seconds .
+
+========================================================================
+Received Import Request.
+  Time since last request: 0.012533 seconds.
+  path: Assets/Scenes/Main.unity
+  artifactKey: Guid(9fc0d4010bbf28b4594072e72b8655ab) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Scenes/Main.unity using Guid(9fc0d4010bbf28b4594072e72b8655ab) Importer(815301076,1909f56bfc062723c751e8b465ee728b)  -> (artifact id: 'b1c47dbad8a3f6a0e77cdcc4e2414a68') in 0.004545 seconds
+  Import took 0.009100 seconds .
+
+========================================================================
+Received Prepare
+Registering precompiled user dll's ...
+Registered in 0.003612 seconds.
+Begin MonoManager ReloadAssembly
+Native extension for WindowsStandalone target not found
+Native extension for WebGL target not found
+Refreshing native plugins compatible for Editor in 0.40 ms, found 0 plugins.
+Preloading 0 native plugins for Editor in 0.00 ms.
+Invoked RoslynAnalysisRunner static constructor.
+RoslynAnalysisRunner will not be running.
+RoslynAnalysisRunner has terminated.
+Mono: successfully reloaded assembly
+- Completed reload, in  1.359 seconds
+Platform modules already initialized, skipping
+Refreshing native plugins compatible for Editor in 0.37 ms, found 0 plugins.
+Preloading 0 native plugins for Editor in 0.00 ms.
+Unloading 1384 Unused Serialized files (Serialized files now loaded: 0)
+System memory in use before: 69.3 MB.
+System memory in use after: 69.4 MB.
+
+Unloading 10 unused Assets to reduce memory usage. Loaded Objects now: 1841.
+Total: 3.228553 ms (FindLiveObjects: 0.460184 ms CreateObjectMapping: 0.070540 ms MarkObjects: 2.594813 ms  DeleteObjects: 0.093517 ms)
+
+AssetImportWorkerClient::OnTransportError - code=2 error=End of file
