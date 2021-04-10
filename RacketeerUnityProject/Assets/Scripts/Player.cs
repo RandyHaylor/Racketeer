@@ -5,6 +5,8 @@ using UnityEngine;
 
 public class Player : NetworkBehaviour
 {
+    public float movementSpeed = 10;
+    public float rotationSpeed = 10;
     float moveHorizontal;
     float horizontalMovementMult = 25f;
     float moveVertical;
@@ -23,11 +25,11 @@ public class Player : NetworkBehaviour
         {
             moveHorizontal = Input.GetAxis("Horizontal");
             moveVertical = Input.GetAxis("Vertical");
-            movement = new Vector3(moveHorizontal * horizontalMovementMult, moveVertical* verticalMovementMult, 0);
+            movement = new Vector3(moveHorizontal * horizontalMovementMult * Time.deltaTime * movementSpeed, moveVertical* verticalMovementMult * Time.deltaTime * movementSpeed, 0);
             //transform.position = transform.position + movement;
             rb.AddForce(movement);
             rotate = rotateMult * Input.GetAxis("RightStickHorizontal");
-            rb.AddTorque(transform.forward * rotate);
+            rb.AddTorque(transform.forward * rotate * Time.deltaTime * rotationSpeed);
         }
     }
     void Update()
