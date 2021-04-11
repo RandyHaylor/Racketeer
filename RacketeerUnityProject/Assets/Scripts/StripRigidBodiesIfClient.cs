@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Mirror;
+using Mirror.Experimental;
 
 public class StripRigidBodiesIfClient : NetworkBehaviour
 {
@@ -10,7 +11,6 @@ public class StripRigidBodiesIfClient : NetworkBehaviour
     {
         if (isClient)
         {
-            //Destroy(gameObject.GetComponent<Rigidbody>());
             Destroy(gameObject.GetComponent<BoxCollider>());
         }
             

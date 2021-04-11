@@ -6,11 +6,11 @@ using UnityEngine;
 public class Player : NetworkBehaviour
 {
     float moveHorizontal;
-    float horizontalMovementMult = 1500f;
+    float horizontalMovementMult = 4000f;
     float moveVertical;
-    float verticalMovementMult = 1500f;
+    float verticalMovementMult = 4000f;
     float rotate;
-    float rotateMult = -500f;
+    float rotateMult = -1500f;
     Vector3 movement;
     Rigidbody rb;
     private void Awake()
