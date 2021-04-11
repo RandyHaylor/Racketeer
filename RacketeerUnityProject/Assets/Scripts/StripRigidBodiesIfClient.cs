@@ -10,7 +10,7 @@ public class StripRigidBodiesIfClient : NetworkBehaviour
     {
         if (isClient)
         {
-            Destroy(gameObject.GetComponent<Rigidbody>());
+            //Destroy(gameObject.GetComponent<Rigidbody>());
             Destroy(gameObject.GetComponent<BoxCollider>());
         }
             

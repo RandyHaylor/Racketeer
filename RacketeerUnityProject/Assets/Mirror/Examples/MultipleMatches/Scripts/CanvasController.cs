@@ -496,7 +496,7 @@ namespace Mirror.Examples.MultipleMatch
                 {
                     playerConn.Send(new ClientMatchMessage { clientMatchOperation = ClientMatchOperation.Started });
 
-                    GameObject player = Instantiate(NetworkManager.singleton.playerPrefab);
+                    GameObject player = Instantiate(NetworkManager.singleton.playerPrefabs[conn.playerNumber]);
 #pragma warning disable 618
                     player.GetComponent<NetworkMatchChecker>().matchId = matchId;
 #pragma warning restore 618

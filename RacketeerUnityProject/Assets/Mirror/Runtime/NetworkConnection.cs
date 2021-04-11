@@ -22,6 +22,8 @@ namespace Mirror
         // clients don't know their own id and they don't know other client's ids.
         public readonly int connectionId;
 
+        public int playerNumber;
+
         /// <summary>Flag that indicates the client has been authenticated.</summary>
         public bool isAuthenticated;
 

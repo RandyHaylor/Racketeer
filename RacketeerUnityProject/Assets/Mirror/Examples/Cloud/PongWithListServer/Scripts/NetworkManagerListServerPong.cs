@@ -11,8 +11,8 @@ namespace Mirror.Cloud.Example
             Transform startPos = numPlayers == 0 ? startPositions[0] : startPositions[1];
 
             GameObject player = startPos != null
-                ? Instantiate(playerPrefab, startPos.position, startPos.rotation)
-                : Instantiate(playerPrefab);
+                ? Instantiate(playerPrefabs[conn.playerNumber], startPos.position, startPos.rotation)
+                : Instantiate(playerPrefabs[conn.playerNumber]);
 
             NetworkServer.AddPlayerForConnection(conn, player);
         }

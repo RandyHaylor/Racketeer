@@ -13,7 +13,6 @@ GameObject:
   - component: {fileID: 1497221164272198890}
   - component: {fileID: 1497221164272198891}
   - component: {fileID: 1497221164272198892}
-  - component: {fileID: 1497221164272198893}
   - component: {fileID: 1497221164272198894}
   - component: {fileID: 1497221164272198871}
   m_Layer: 0
@@ -117,27 +116,6 @@ MonoBehaviour:
   visible: 0
   m_AssetId: 
   hasSpawned: 0
---- !u!114 &1497221164272198893
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1497221164272198895}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2f74aedd71d9a4f55b3ce499326d45fb, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  syncMode: 0
-  syncInterval: 0.1
-  clientAuthority: 0
-  localPositionSensitivity: 0.01
-  localRotationSensitivity: 1
-  localScaleSensitivity: 1
-  compressRotation: 0
-  interpolateScale: 1
-  syncScale: 0
 --- !u!114 &1497221164272198894
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -163,3 +141,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 42af6395d30b11047b5ee7eea47ea7eb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  syncMode: 0
+  syncInterval: 0.1
+  collectedSound: {fileID: 8300000, guid: 79180f511d89441b9aa23ccae1992fe0, type: 3}

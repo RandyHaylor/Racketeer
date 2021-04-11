@@ -100,9 +100,9 @@ namespace Mirror
         [Header("Player Object")]
         [FormerlySerializedAs("m_PlayerPrefab")]
         [Tooltip("Prefab of the player object. Prefab must have a Network Identity component. May be an empty game object or a full avatar.")]
-        public GameObject playerPrefab;
-
-        public List<Material> playerMaterials;
+        public List<GameObject> playerPrefabs;
+        /// <summary>Links player network ID to player number for player color</summary>
+        public List<bool> playerSlotsActive;
 
         /// <summary>Enable to automatically create player objects on connect and on scene change.</summary>
         [FormerlySerializedAs("m_AutoCreatePlayer")]
@@ -171,10 +171,17 @@ namespace Mirror
             // always >= 0
             maxConnections = Mathf.Max(maxConnections, 0);
 
-            if (playerPrefab != null && playerPrefab.GetComponent<NetworkIdentity>() == null)
+            if (playerPrefabs.Count > 0)
             {
-                Debug.LogError("NetworkManager - playerPrefab must have a NetworkIdentity.");
-                playerPrefab = null;
+                for (int i = 0; i < playerPrefabs.Count; i++)
+                {
+                    if (playerPrefabs[i].GetComponent<NetworkIdentity>() == null)
+                    {
+                        Debug.LogError("NetworkManager - playerPrefab must have a NetworkIdentity.");
+                        playerPrefabs[i] = null;
+                    }
+                }
+
             }
         }
 
@@ -703,8 +710,8 @@ namespace Mirror
             NetworkClient.RegisterHandler<NotReadyMessage>(OnClientNotReadyMessageInternal);
             NetworkClient.RegisterHandler<SceneMessage>(OnClientSceneInternal, false);
 
-            if (playerPrefab != null)
-                NetworkClient.RegisterPrefab(playerPrefab);
+            foreach (GameObject prefab in playerPrefabs.Where(t => t != null))
+                NetworkClient.RegisterPrefab(prefab);
 
             foreach (GameObject prefab in spawnPrefabs.Where(t => t != null))
                 NetworkClient.RegisterPrefab(prefab);
@@ -1107,17 +1114,17 @@ namespace Mirror
         {
             //Debug.Log("NetworkManager.OnServerAddPlayer");
 
-            if (autoCreatePlayer && playerPrefab == null)
+            if (autoCreatePlayer && playerPrefabs.Count == 0)
             {
                 Debug.LogError("The PlayerPrefab is empty on the NetworkManager. Please setup a PlayerPrefab object.");
                 return;
             }
-
+            /* I think this is checked elsewhere... - RH
             if (autoCreatePlayer && playerPrefab.GetComponent<NetworkIdentity>() == null)
             {
                 Debug.LogError("The PlayerPrefab does not have a NetworkIdentity. Please add a NetworkIdentity to the player prefab.");
                 return;
-            }
+            }*/
 
             if (conn.identity != null)
             {
@@ -1214,16 +1221,18 @@ namespace Mirror
         // The default implementation for this function creates a new player object from the playerPrefab.
         public virtual void OnServerAddPlayer(NetworkConnection conn)
         {
+            //Assign player number (used to assign a designated player prefab for that player slot for the moment - RH 4/11/21, Racketeer Coin Grab branch)
+            conn.playerNumber = GetFreePlayerNumber();
+
             Transform startPos = GetStartPosition();
             GameObject player = startPos != null
-                ? Instantiate(playerPrefab, startPos.position, startPos.rotation)
-                : Instantiate(playerPrefab);
+                ? Instantiate(playerPrefabs[conn.playerNumber], startPos.position, startPos.rotation)
+                : Instantiate(playerPrefabs[conn.playerNumber]);
 
-            player.gameObject.GetComponent<MeshRenderer>().material = playerMaterials[numPlayers]; //TODO - Randy Fix This Obv Broken Hack
-
+    
             // instantiating a "Player" prefab gives it the name "Player(clone)"
             // => appending the connectionId is WAY more useful for debugging!
-            player.name = $"{playerPrefab.name} [connId={conn.connectionId}]";
+            player.name = $"{playerPrefabs[conn.playerNumber].name} [connId={conn.connectionId}]";
             NetworkServer.AddPlayerForConnection(conn, player);
         }
 
@@ -1290,6 +1299,43 @@ namespace Mirror
                 // add player if existing one is null
                 NetworkClient.AddPlayer();
             }
+        }
+
+        public static void ReleasePlayerNumber(int playerNumber)
+        {
+            singleton.ReleasePlayerNumberPrivate(playerNumber);
+        }
+
+        public void ReleasePlayerNumberPrivate(int playerNumber)
+        {
+            if (playerSlotsActive.Count > playerNumber)
+            {
+                playerSlotsActive[playerNumber] = false;
+                Debug.Log("Released Player number: " + playerNumber);
+            }
+        }
+        int GetFreePlayerNumber()
+        {
+            if (playerSlotsActive.Count == 0) //initial first client connection
+            {
+                playerSlotsActive.Add(true);
+                Debug.Log("assigning player number 0");
+                return 0;
+            }
+
+            for (int i = 0; i < playerSlotsActive.Count; i++)
+            {
+                if (!playerSlotsActive[i])
+                {
+                    playerSlotsActive[i] = true; //fill free existing lowest player slot
+                    return i;
+                }
+            }
+
+            //add new player slot on list
+            playerSlotsActive.Add(true);
+
+            return playerSlotsActive.Count - 1;
         }
 
         // Since there are multiple versions of StartServer, StartClient and

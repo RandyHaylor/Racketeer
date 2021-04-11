@@ -1058,6 +1058,7 @@ namespace Mirror
         public static void DestroyPlayerForConnection(NetworkConnection conn)
         {
             // destroy all objects owned by this connection, including the player object
+            NetworkManager.ReleasePlayerNumber(conn.playerNumber);
             conn.DestroyOwnedObjects();
             conn.identity = null;
         }

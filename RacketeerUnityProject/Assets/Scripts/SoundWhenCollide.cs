@@ -1,17 +1,21 @@
+using Mirror;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class SoundWhenCollide : MonoBehaviour
+public class SoundWhenCollide : NetworkBehaviour
 {
-    AudioSource source;
-    private void Start()
-    {
-        source = GetComponent<AudioSource>();
-    }
+    public AudioClip bounceSound;
+
     private void OnCollisionEnter(Collision collision)
     {
-        source.Play();
+        CmdPlaySound();
+    }
+
+    [ClientRpc]
+    private void CmdPlaySound()
+    {
+        SoundManager.PlaySound(bounceSound);
     }
 
 

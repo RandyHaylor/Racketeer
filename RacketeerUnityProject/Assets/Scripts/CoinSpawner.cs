@@ -1,8 +1,9 @@
+using Mirror;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class CoinSpawner : MonoBehaviour
+public class CoinSpawner : NetworkBehaviour
 {
     public GameObject CoinPrefab;
 
@@ -34,6 +35,9 @@ public class CoinSpawner : MonoBehaviour
     }
     void SpawnCoin()
     {
-        GameObject.Instantiate(CoinPrefab, new Vector3(Random.Range(-8, 8), Random.Range(-4, 4), 0), Quaternion.identity);
+        if (!isServer) return;
+
+        GameObject newCoin = GameObject.Instantiate(CoinPrefab, new Vector3(Random.Range(-8, 8), Random.Range(-4, 4), 0), CoinPrefab.transform.rotation);
+        NetworkServer.Spawn(newCoin);
     }
 }
