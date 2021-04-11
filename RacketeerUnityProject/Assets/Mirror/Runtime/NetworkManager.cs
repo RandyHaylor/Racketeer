@@ -102,6 +102,8 @@ namespace Mirror
         [Tooltip("Prefab of the player object. Prefab must have a Network Identity component. May be an empty game object or a full avatar.")]
         public GameObject playerPrefab;
 
+        public List<Material> playerMaterials;
+
         /// <summary>Enable to automatically create player objects on connect and on scene change.</summary>
         [FormerlySerializedAs("m_AutoCreatePlayer")]
         [Tooltip("Should Mirror automatically spawn the player after scene change?")]
@@ -1216,6 +1218,8 @@ namespace Mirror
             GameObject player = startPos != null
                 ? Instantiate(playerPrefab, startPos.position, startPos.rotation)
                 : Instantiate(playerPrefab);
+
+            player.gameObject.GetComponent<MeshRenderer>().material = playerMaterials[numPlayers]; //TODO - Randy Fix This Obv Broken Hack
 
             // instantiating a "Player" prefab gives it the name "Player(clone)"
             // => appending the connectionId is WAY more useful for debugging!
