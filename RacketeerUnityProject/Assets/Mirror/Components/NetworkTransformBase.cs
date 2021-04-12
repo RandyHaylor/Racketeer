@@ -289,7 +289,7 @@ namespace Mirror
             if (start != null)
             {
                 float t = CurrentInterpolationFactor(start, goal);
-                return Quaternion.Slerp(start.localRotation, goal.localRotation, t);
+                return Quaternion.Lerp(start.localRotation, goal.localRotation, t);
             }
             return defaultRotation;
         }
@@ -320,7 +320,7 @@ namespace Mirror
             float difference = goalTime - startTime;
             float timeSinceGoalReceived = Time.time - goalTime;
             //increasing to teleport less and lerp more
-            return timeSinceGoalReceived > difference * 50; //return timeSinceGoalReceived > difference * 5;
+            return timeSinceGoalReceived > difference * 10; //return timeSinceGoalReceived > difference * 5;
         }
 
         // moved since last time we checked it?
