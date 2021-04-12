@@ -14,6 +14,30 @@ public class GameManager : NetworkBehaviour
 
     private static GameManager _instance;
 
+    /* spawning multiple spheres wasn't a great idea, but fun to play with. Commenting out code for now
+    public GameObject spherePrefab;
+    float sphereSpawnCooldown = 1f;
+    bool sphereSpawnCooldownActive = false;
+    int maxSpheres = 20;
+    int sphereCount = 1;
+    ////to call this func from sphere: GameManager.Instance.NewSphere(gameObject.transform.position, Quaternion.identity);
+    public void NewSphere(Vector3 location, Quaternion rotation)
+    {
+        if (!sphereSpawnCooldownActive & maxSpheres > sphereCount)
+        {
+            sphereSpawnCooldownActive = true;
+            StartCoroutine(sphereSpawnCooldownTimer(sphereSpawnCooldown));
+            Instantiate(spherePrefab, location, rotation);
+        }
+    }
+
+    IEnumerator sphereSpawnCooldownTimer(float cooldownTimeSeconds)
+    {
+        yield return new WaitForSeconds(cooldownTimeSeconds);
+        sphereSpawnCooldownActive = false;
+    }
+    */
+
     public static GameManager Instance
     {
         get
@@ -24,6 +48,8 @@ public class GameManager : NetworkBehaviour
             return _instance;
         }
     }
+
+
 
     void Awake()
     {

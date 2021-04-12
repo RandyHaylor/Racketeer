@@ -5,8 +5,8 @@ using Mirror;
 
 public class ChangeColorOnPlayerHit : NetworkBehaviour
 {
-    Vector3 colorCache;
-    Color tempColor;
+    Vector3 colorCache; //for sending color info between server & client
+    Color tempColor; // to avoid creating a new color object every time the color changes
 
     private void OnCollisionEnter(Collision collision)
     {
@@ -20,9 +20,11 @@ public class ChangeColorOnPlayerHit : NetworkBehaviour
                 colorCache.y = collision.gameObject.GetComponent<MeshRenderer>().material.color.g;
                 colorCache.z = collision.gameObject.GetComponent<MeshRenderer>().material.color.b;
 
+                gameObject.GetComponent<MeshRenderer>().material.color = tempColor;
+
                 RpcUpdateSphereColor(colorCache);
             }
-
+            
         }
     }
 
