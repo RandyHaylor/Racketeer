@@ -37,7 +37,7 @@ public class CoinSpawner : NetworkBehaviour
     {
         if (!isServer) return;
 
-        GameObject newCoin = GameObject.Instantiate(CoinPrefab, new Vector3(Random.Range(-8, 8), Random.Range(-4, 4), 0), CoinPrefab.transform.rotation);
+        GameObject newCoin = GameObject.Instantiate(CoinPrefab, new Vector3(Random.Range(-8f, 8f), Random.Range(-4f, 4f), 0f), CoinPrefab.transform.rotation);
         NetworkServer.Spawn(newCoin);
     }
 }

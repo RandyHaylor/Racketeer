@@ -17,6 +17,7 @@ public class DissapearOnBallCollide : NetworkBehaviour
             CmdPlaySound();
             CoinSpawner.SpawnNewCoin();
             StartCoroutine(DestroyAftertime(0.1f));
+            GameManager.AddPointForOwningPlayer();
         }
     }
 

@@ -558,6 +558,8 @@ namespace Mirror
             // because the observers will be rebuilt only if we have a controller
             conn.identity = identity;
 
+            conn.identity.playerNumber = conn.playerNumber;
+
             // Set the connection on the NetworkIdentity on the server, NetworkIdentity.SetLocalPlayer is not called on the server (it is on clients)
             identity.SetClientOwner(conn);
 

@@ -68,6 +68,8 @@ namespace Mirror
         //   => fixes https://github.com/vis2k/Mirror/issues/2615
         public bool isLocalPlayer { get; internal set; }
 
+        public int playerNumber { get; set; }
+
         /// <summary>True if this object only exists on the server</summary>
         public bool isServerOnly => isServer && !isClient;
 
