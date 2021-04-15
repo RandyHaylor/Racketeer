@@ -11,8 +11,7 @@ public class AddSlightSpinOnCollision : NetworkBehaviour
     }
 
     void AddTorque(Vector3 torque)
-    {
-        Debug.Log("Adding initial torque, isServer: " + isServer);
+    {        
         gameObject.GetComponent<Rigidbody>().AddTorque(torque);
     }
 }

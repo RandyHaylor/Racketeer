@@ -68,7 +68,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 6c53c249b10411348bb51c444b26f87c, type: 2}
+  - {fileID: 2100000, guid: 81717dd1e3eca7d49b7c92664e64ed88, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -134,6 +134,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   syncMode: 0
   syncInterval: 0.1
+  PlayerBoostSoundClip: {fileID: 8300000, guid: 88e0f33d1a127174fbc8504a4f69d3fd, type: 3}
 --- !u!114 &5852367113486498405
 MonoBehaviour:
   m_ObjectHideFlags: 0

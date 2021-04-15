@@ -25,7 +25,7 @@ namespace Mirror
         // [0,2] should be enough. anything >2s is too laggy anyway.
         [Tooltip("Time in seconds until next change is synchronized to the client. '0' means send immediately if changed. '0.5' means only send changes every 500ms.\n(This is for state synchronization like SyncVars, SyncLists, OnSerialize. Not for Cmds, Rpcs, etc.)")]
         [Range(0, 2)]
-        [HideInInspector] public float syncInterval = 0.1f;
+        [HideInInspector] public float syncInterval = 0.016f;
 
         /// <summary>True if this object is on the server and has been spawned.</summary>
         // This is different from NetworkServer.active, which is true if the

@@ -134,6 +134,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   syncMode: 0
   syncInterval: 0.1
+  PlayerBoostSoundClip: {fileID: 8300000, guid: 88e0f33d1a127174fbc8504a4f69d3fd, type: 3}
 --- !u!114 &4709181646131733208
 MonoBehaviour:
   m_ObjectHideFlags: 0

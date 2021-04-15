@@ -36,6 +36,10 @@ namespace Mirror
         // This component could be on the player object or any object that has been assigned authority to this client.
         bool IsClientWithAuthority => hasAuthority && clientAuthority;
 
+        [Header("BYPASS INTERPOLATION")]
+        [Tooltip("For use in conjunction with NetworkRigidbody.")]
+        public bool AlwaysTeleport;
+
         // Sensitivity is added for VR where human players tend to have micro movements so this can quiet down
         // the network traffic.  Additionally, rigidbody drift should send less traffic, e.g very slow sliding / rolling.
         [Header("Sensitivity")]
@@ -46,6 +50,11 @@ namespace Mirror
         [Tooltip("Changes to the transform must exceed these values to be transmitted on the network.")]
         public float localScaleSensitivity = .01f;
 
+
+        [Header("Rigidbody Velocity Approximation")]
+        [Tooltip("Apply a guess at a speed to the rigidbody so the local physics engine can continue to guess at object movement between updates.")]
+        public bool applyExperimentalRigidbodyVelocity = false;
+
         [Header("Compression")]
         [Tooltip("Enables smallest-three quaternion compression, which is lossy. Great for 3D, not great for 2D where minimal sprite rotations would look wobbly.")]
         public bool compressRotation; // disabled by default to not break 2D projects
@@ -54,11 +63,14 @@ namespace Mirror
         [Tooltip("Set to true if scale should be interpolated, false is ideal for instant sprite flipping.")]
         public bool interpolateScale = true;
 
+
         [Header("Synchronization")]
         // It should be very rare cases that people want to continuously sync scale, true by default to not break previous projects that use it
         // Users in most scenarios are best to send change of scale via cmd/rpc, syncvar/hooks, only once, and when required.  Saves instant 12 bytes (25% of NT bandwidth!)
         [Tooltip("Set to false to not continuously send scale data, and save bandwidth.")]
         public bool syncScale = true;
+        [Tooltip("Disable to never sync transform rotation")]
+        public bool syncRotation = true;
 
         // target transform to sync. can be on a child.
         protected abstract Transform targetComponent { get; }
@@ -71,6 +83,7 @@ namespace Mirror
         // client
         public class DataPoint
         {
+            public float senderTimeStamp;
             public float timeStamp;
             // use local position/rotation for VR support
             public Vector3 localPosition;
@@ -289,7 +302,7 @@ namespace Mirror
             if (start != null)
             {
                 float t = CurrentInterpolationFactor(start, goal);
-                return Quaternion.Lerp(start.localRotation, goal.localRotation, t);
+                return Quaternion.Slerp(start.localRotation, goal.localRotation, t);
             }
             return defaultRotation;
         }
@@ -329,8 +342,8 @@ namespace Mirror
             // moved or rotated or scaled?
             // local position/rotation/scale for VR support
             bool moved = Vector3.Distance(lastPosition, targetComponent.localPosition) > localPositionSensitivity;
-            bool scaled = Vector3.Distance(lastScale, targetComponent.localScale) > localScaleSensitivity;
-            bool rotated = Quaternion.Angle(lastRotation, targetComponent.localRotation) > localRotationSensitivity;
+            bool scaled = syncScale && Vector3.Distance(lastScale, targetComponent.localScale) > localScaleSensitivity;
+            bool rotated = syncRotation && Quaternion.Angle(lastRotation, targetComponent.localRotation) > localRotationSensitivity;
 
             // save last for next frame to compare
             // (only if change was detected. otherwise slow moving objects might
@@ -352,8 +365,18 @@ namespace Mirror
         {
             // local position/rotation for VR support
             targetComponent.localPosition = position;
-            targetComponent.localRotation = rotation;
-            targetComponent.localScale = scale;
+            if (syncRotation) targetComponent.localRotation = rotation;
+            if (syncScale) targetComponent.localScale = scale;
+        }
+        //experimental, applying speeds to local rigidbody from estimates based on movement updates... -RH
+        void ApplyEstimatedVelocityToLocalRigidbodyIfPresent()
+        {
+            if (targetComponent.gameObject.GetComponent<Rigidbody>() != null)
+            {
+                
+                targetComponent.gameObject.GetComponent<Rigidbody>().velocity = (goal.localPosition - start.localPosition).normalized * start.movementSpeed;
+
+            }
         }
 
         void Update()
@@ -401,7 +424,7 @@ namespace Mirror
                     if (goal != null)
                     {
                         // teleport or interpolate
-                        if (NeedsTeleport())
+                        if (AlwaysTeleport || NeedsTeleport())
                         {
                             // local position/rotation for VR support
                             ApplyPositionRotationScale(goal.localPosition, goal.localRotation, goal.localScale);
@@ -416,6 +439,9 @@ namespace Mirror
                             ApplyPositionRotationScale(InterpolatePosition(start, goal, targetComponent.localPosition),
                                                        InterpolateRotation(start, goal, targetComponent.localRotation),
                                                        InterpolateScale(start, goal, targetComponent.localScale));
+
+                            if (applyExperimentalRigidbodyVelocity)
+                                ApplyEstimatedVelocityToLocalRigidbodyIfPresent();
                         }
                     }
                 }

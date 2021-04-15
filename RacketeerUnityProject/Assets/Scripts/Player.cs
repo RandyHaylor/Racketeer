@@ -3,12 +3,13 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Audio;
 
 public class Player : NetworkBehaviour
 {
-    float speedLimit = 5f;
-    float angularSpeedLimitNormal = 4f;
-    float angularSpeedLimitBoost = 7f; //10 is the current global limit as well - have to increase in project settings as well to go higher with this
+    public ParticleSystem boostFireParticleSys;
+    public AudioClip PlayerBoostSoundClip;
+
     float moveHorizontal;
     float horizontalMovementMult = 3000f;
     float moveVertical;
@@ -17,12 +18,20 @@ public class Player : NetworkBehaviour
     float rotate;
     float rotateMult = -600f;
     float triggerAxis;
+
     float rotateBoostDuration = 0.1f;
     bool rotateBoostActive = false;
-    float rotateBoostCooldown = 0.5f;
+    float rotateBoostCooldown = 1f;
     bool rotateBoostCoolingDown = false;
-    float rotateBoostAmount;
+    float rotateBoostAmount;//for passing temporary amounts, normally 0
+
+    bool velocityBoostActive = false;
+    float velocityBoostDuration = 0.1f;
+    float velocityBoostCooldown = 1f;
+    bool velocityBoostCoolingDown = false;
+
     Vector3 movement;
+    bool velocityBoostInput;
     Rigidbody rb;
     private void Awake()
     {
@@ -35,24 +44,41 @@ public class Player : NetworkBehaviour
     }
     void HandleMovement()
     {
-        if (isLocalPlayer)
+        if (isLocalPlayer && isClient)
         {
-            moveHorizontal = Input.GetAxis("Horizontal");
-            moveVertical = Input.GetAxis("Vertical");
-            if (Math.Abs(moveHorizontal) < 0.1f) moveHorizontal = 0f;
-            if (Math.Abs(moveVertical) < 0.1f) moveVertical = 0f;
+            moveHorizontal = Mathf.Clamp(Input.GetAxis("LeftStickHorizontal") + Input.GetAxis("Horizontal"), -1, 1);
+            moveVertical = Mathf.Clamp(Input.GetAxis("LeftStickVertical") + Input.GetAxis("Vertical"), -1, 1);
+            if (Math.Abs(moveHorizontal) < 0.15f) moveHorizontal = 0f;
+            if (Math.Abs(moveVertical) < 0.15f) moveVertical = 0f;
             //movement = new Vector3(moveHorizontal * horizontalMovementMult, moveVertical* verticalMovementMult, 0);
             //below code prevents creating a new Vector3 object every frame that will eventually be cleaned up by garbage collection, which can cause a lag spike
             //  movement and rotate are global objects for this reason - they get re-used each frame
             movement.x = moveHorizontal * horizontalMovementMult * Time.deltaTime;
             movement.y = moveVertical * verticalMovementMult * Time.deltaTime;
 
-            rotateStickHorizontal = Input.GetAxis("RightStickHorizontal");
+            //right stick slower rotation code   
+            rotateStickHorizontal = Input.GetAxis("RightStickHorizontal"); 
             if (Math.Abs(rotateStickHorizontal) < 0.1f) rotateStickHorizontal = 0f;
             rotate = rotateMult * rotateStickHorizontal * Time.deltaTime;
+
+            //velocity boost code (bumpers)
+            /*
+            if (Input.GetButton("LeftBumper") || Input.GetButton("RightBumper") || Input.GetButton("Submit")) //will be true for a couple hundred frames...
+                velocityBoostInput = true;
+            else
+                velocityBoostInput = false;
+            
+
+            if (velocityBoostInput && !velocityBoostCoolingDown && !velocityBoostActive)
+            {
+                velocityBoostActive = true;
+                StartCoroutine(VelocityBoostTimer());
+            }*/
+
+            //rotational boost code (triggers)
             triggerAxis = Input.GetAxis("triggerAxis");
 
-            if ( Math.Abs(triggerAxis) > 0.1f && !rotateBoostCoolingDown && !rotateBoostActive)
+            if (triggerAxis > 0.1f && !rotateBoostCoolingDown && !rotateBoostActive) //Math.Abs(triggerAxis)
             {
                 if (triggerAxis>0f)
                 {
@@ -63,14 +89,33 @@ public class Player : NetworkBehaviour
                     rotateBoostAmount = rotateMult * - 2;
                 }
                 rotateBoostActive = true;
+                velocityBoostActive = true;
+                StartCoroutine(VelocityBoostTimer());
                 StartCoroutine(AngularBoostTimer());
+                if (isLocalPlayer) SoundManager.PlaySound(PlayerBoostSoundClip, 0.25f, 0.5f);
+                CmdPlayerBoostSoundOtherPlayers();
+                CmdPlayerBoostParticles();
+                
             }
-
-            CmdApplyForceOnServer(movement, rotate, rotateBoostAmount);
+            CmdApplyForceOnServer(movement, rotate, rotateBoostActive, velocityBoostActive);
             
         }
     }
+    [Command(requiresAuthority = false)] void CmdPlayerBoostParticles() => RpcPlayerBoostParticles();
+    [ClientRpc] void RpcPlayerBoostParticles() => boostFireParticleSys.Play();
 
+    [Command(requiresAuthority = false)] void CmdPlayerBoostSoundOtherPlayers() => RpcPlayerBoostSound();
+    [ClientRpc] void RpcPlayerBoostSound(){if (!isLocalPlayer) SoundManager.PlaySound(PlayerBoostSoundClip, 0.25f, 0.5f);}
+
+
+    IEnumerator VelocityBoostTimer()
+    {
+        yield return new WaitForSeconds(velocityBoostDuration);
+        velocityBoostCoolingDown = true;
+        velocityBoostActive = false;
+        yield return new WaitForSeconds(velocityBoostCooldown);
+        velocityBoostCoolingDown = false;
+    }
     IEnumerator AngularBoostTimer()
     {
         Debug.Log("Started AngularBoostTimer Coroutine");
@@ -84,24 +129,25 @@ public class Player : NetworkBehaviour
 
 
     [Command] // function following this line is run only on server, and will therefore only affect server object (which has a rigidbody for physics sim)
-    void CmdApplyForceOnServer(Vector3 directionalForce, float rotationalForce, float rotationalBoostForce)
+    void CmdApplyForceOnServer(Vector3 directionalForce, float rotationalForce, bool rotationalBoostActive, bool velocityBoostActive)
     {
-        if (Vector3.Dot(rb.velocity, directionalForce.normalized) < speedLimit)
-            rb.AddForce(directionalForce);
+        if (Vector3.Dot(rb.velocity, directionalForce.normalized) < (GameManager.Instance.playerSpeedLimit * (velocityBoostActive? GameManager.Instance.speedLimitBoostMultiplier : 1f) ))
+            rb.AddForce(directionalForce * (velocityBoostActive ? GameManager.Instance.VelocityBoostMultiplier : 1f));
         
         if (
-                (rotationalForce > 0  && rb.angularVelocity.z < angularSpeedLimitNormal) 
+                (rotationalForce > 0  && rb.angularVelocity.z < (velocityBoostActive ? GameManager.Instance.angularSpeedLimitBoost : GameManager.Instance.angularSpeedLimitNormal) )
                 ||
-                (rotationalForce < 0 && rb.angularVelocity.z > -1 * angularSpeedLimitNormal)
+                (rotationalForce < 0 && rb.angularVelocity.z > -1 * (velocityBoostActive ? GameManager.Instance.angularSpeedLimitBoost : GameManager.Instance.angularSpeedLimitNormal))
             )
-            rb.AddTorque(transform.forward * rotationalForce);
-
+            rb.AddTorque(transform.forward * rotationalForce * (velocityBoostActive ? GameManager.Instance.RotationalBoostMultiplier : 1f));
+        /* old code provided a fixed rotational boost, new code just boosts whatever you're doing, rotation or velocity
         if (
                 (rotationalBoostForce > 0 && rb.angularVelocity.z < angularSpeedLimitBoost)
                 ||
                 (rotationalBoostForce < 0 && rb.angularVelocity.z > -1 * angularSpeedLimitBoost)
             )
             rb.AddTorque(transform.forward * rotationalBoostForce);
+        */
     }
 
 
