@@ -162,6 +162,7 @@ MonoBehaviour:
   compressRotation: 0
   interpolateScale: 0
   syncScale: 0
+  syncRotation: 1
 --- !u!54 &5619756305628283420
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -205,7 +206,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   syncMode: 0
-  syncInterval: 0
+  syncInterval: 0.016
   target: {fileID: 5619756305628283420}
   clientAuthority: 0
   syncVelocity: 1

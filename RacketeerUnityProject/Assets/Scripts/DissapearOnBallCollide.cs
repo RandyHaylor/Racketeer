@@ -9,10 +9,9 @@ public class DissapearOnBallCollide : NetworkBehaviour
     bool beingDestroyed = false;
     public GameObject explosionPrefab;
  
-    [Server]
     private void OnTriggerEnter(Collider other)
     {        
-        if (GameManager.Instance.playerNumberOwningBall >= 0 && !beingDestroyed && other.gameObject.tag == "Ball") // ball only has collider on server, so this only runs on server
+        if (isServer && GameManager.Instance.playerNumberOwningBall >= 0 && !beingDestroyed && other.gameObject.tag == "Ball") // ball only has collider on server, so this only runs on server
         {
             beingDestroyed = true;
             CmdPlaySound();

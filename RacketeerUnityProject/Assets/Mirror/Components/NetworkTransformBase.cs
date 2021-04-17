@@ -72,6 +72,8 @@ namespace Mirror
         [Tooltip("Disable to never sync transform rotation")]
         public bool syncRotation = true;
 
+        float previousSenderTimeStamp = 0;
+
         // target transform to sync. can be on a child.
         protected abstract Transform targetComponent { get; }
 
@@ -100,7 +102,7 @@ namespace Mirror
 
         // serialization is needed by OnSerialize and by manual sending from authority
         // public only for tests
-        public static void SerializeIntoWriter(NetworkWriter writer, Vector3 position, Quaternion rotation, Vector3 scale, bool compressRotation, bool syncScale)
+        public static void SerializeIntoWriter(NetworkWriter writer, Vector3 position, Quaternion rotation, Vector3 scale, bool compressRotation, bool syncScale, float sendTime)
         {
             // serialize position, rotation, scale
             // => compress rotation from 4*4=16 to 4 bytes
@@ -116,13 +118,14 @@ namespace Mirror
                 // uncompressed for 2D
                 writer.WriteQuaternion(rotation);
             }
+            writer.WriteSingle(sendTime);
             if (syncScale) { writer.WriteVector3(scale); }
         }
 
         public override bool OnSerialize(NetworkWriter writer, bool initialState)
         {
             // use local position/rotation/scale for VR support
-            SerializeIntoWriter(writer, targetComponent.localPosition, targetComponent.localRotation, targetComponent.localScale, compressRotation, syncScale);
+            SerializeIntoWriter(writer, targetComponent.localPosition, targetComponent.localRotation, targetComponent.localScale, compressRotation, syncScale, Time.time);
             return true;
         }
 
@@ -134,7 +137,7 @@ namespace Mirror
         static float EstimateMovementSpeed(DataPoint from, DataPoint to, Transform transform, float sendInterval)
         {
             Vector3 delta = to.localPosition - (from != null ? from.localPosition : transform.localPosition);
-            float elapsed = from != null ? to.timeStamp - from.timeStamp : sendInterval;
+            float elapsed = from != null ? to.senderTimeStamp - from.senderTimeStamp : sendInterval;
             // avoid NaN
             return elapsed > 0 ? delta.magnitude / elapsed : 0;
         }
@@ -153,14 +156,24 @@ namespace Mirror
                                 : reader.ReadQuaternion(),
                 // use current target scale, so we can check boolean and reader later, to see if the data is actually sent.
                 localScale = targetComponent.localScale,
-                timeStamp = Time.time
+                timeStamp = Time.time,
+                senderTimeStamp = reader.ReadSingle()
             };
-            
+
+            if (temp.senderTimeStamp < previousSenderTimeStamp)
+            {
+                Debug.Log("abandoned out-of-order NetworkTransform update (senderTimeStamp on new update was older than previously sent time");
+                return;
+            }
+            else
+                previousSenderTimeStamp = temp.senderTimeStamp;
+
+
             if (syncScale)
             {
                 // Reader length is checked here, 12 is used as thats the current Vector3 (3 floats) amount.
                 // In rare cases people may do mis-matched builds, log useful warning message, and then do not process missing scale data.
-                if (reader.Length >= 12) { temp.localScale = reader.ReadVector3(); }
+                if (reader.Length >= 13) { temp.localScale = reader.ReadVector3(); }
                 else { Debug.LogWarning("Reader length does not contain enough data for a scale, please check that both server and client builds syncScale booleans match.", this); }
             }
 
@@ -175,7 +188,7 @@ namespace Mirror
             {
                 start = new DataPoint
                 {
-                    timeStamp = Time.time - syncInterval,
+                    timeStamp = Time.time - (syncInterval/2),
                     // local position/rotation for VR support
                     localPosition = targetComponent.localPosition,
                     localRotation = targetComponent.localRotation,
@@ -213,8 +226,7 @@ namespace Mirror
             //              C
             //
             else
-            {
-                float oldDistance = Vector3.Distance(start.localPosition, goal.localPosition);
+            {                
                 float newDistance = Vector3.Distance(goal.localPosition, temp.localPosition);
 
                 start = goal;
@@ -223,11 +235,11 @@ namespace Mirror
                 // position if we aren't too far away
                 //
                 // local position/rotation for VR support
-                if (Vector3.Distance(targetComponent.localPosition, start.localPosition) < oldDistance + newDistance)
+                if (Vector3.Distance(targetComponent.localPosition, temp.localPosition) < newDistance)
                 {
                     start.localPosition = targetComponent.localPosition;
-                    start.localRotation = targetComponent.localRotation;
-                    start.localScale = targetComponent.localScale;
+                    if (syncRotation) start.localRotation = targetComponent.localRotation;
+                    if (syncScale) start.localScale = targetComponent.localScale;
                 }
             }
 
@@ -405,7 +417,7 @@ namespace Mirror
                             // local position/rotation for VR support
                             using (PooledNetworkWriter writer = NetworkWriterPool.GetWriter())
                             {
-                                SerializeIntoWriter(writer, targetComponent.localPosition, targetComponent.localRotation, targetComponent.localScale, compressRotation, syncScale);
+                                SerializeIntoWriter(writer, targetComponent.localPosition, targetComponent.localRotation, targetComponent.localScale, compressRotation, syncScale, Time.time);
 
                                 // send to server
                                 CmdClientToServerSync(writer.ToArraySegment());

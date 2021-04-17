@@ -6,10 +6,11 @@ using UnityEngine;
 public class SoundWhenCollide : NetworkBehaviour
 {
     public AudioClip bounceSound;
-    [Server]
+    
     private void OnCollisionEnter(Collision collision)
     {
-        CmdPlaySound();
+        if (isServer)
+            CmdPlaySound();
     }
 
     [ClientRpc]

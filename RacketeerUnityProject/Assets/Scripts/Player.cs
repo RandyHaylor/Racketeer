@@ -128,7 +128,7 @@ public class Player : NetworkBehaviour
     }
 
 
-    [Command] // function following this line is run only on server, and will therefore only affect server object (which has a rigidbody for physics sim)
+    [Command(requiresAuthority = false)] // function following this line is run only on server, and will therefore only affect server object (which has a rigidbody for physics sim)
     void CmdApplyForceOnServer(Vector3 directionalForce, float rotationalForce, bool rotationalBoostActive, bool velocityBoostActive)
     {
         if (Vector3.Dot(rb.velocity, directionalForce.normalized) < (GameManager.Instance.playerSpeedLimit * (velocityBoostActive? GameManager.Instance.speedLimitBoostMultiplier : 1f) ))

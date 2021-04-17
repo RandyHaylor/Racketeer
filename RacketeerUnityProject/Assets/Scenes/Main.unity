@@ -452,8 +452,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   syncMode: 0
   syncInterval: 0.1
-  VelocityBoostMultiplier: 3
+  VelocityBoostMultiplier: 3.5
   RotationalBoostMultiplier: 15
+  playerSpeedLimit: 5
+  speedLimitBoostMultiplier: 2
+  angularSpeedLimitBoost: 10
+  angularSpeedLimitNormal: 4
   InitialCountdownSound: {fileID: 8300000, guid: 1bf27107ae24fbe44aa023940575e69a, type: 3}
   wallTurningRate: 3
   randomizeGravity: 0
@@ -2213,7 +2217,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 768523109}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: cb5874bb2d5648242ba214c34857b1c8, type: 3}
+  m_Script: {fileID: 11500000, guid: 8e3506a42c3d4ef47bda634dc2039b9c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   mixer: {fileID: 24100000, guid: 626190e3b6e78e741bb5aac554acc24f, type: 2}
@@ -2269,7 +2273,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 768523111}
-        m_TargetAssemblyTypeName: MasterVolumeChanger, Assembly-CSharp
+        m_TargetAssemblyTypeName: SliderMasterVolumeChanger, Assembly-CSharp
         m_MethodName: SetLevel
         m_Mode: 1
         m_Arguments:
@@ -8552,6 +8556,10 @@ PrefabInstance:
     - target: {fileID: 706313529074848048, guid: af00479f96c5bc14e8230ace1d4c074a, type: 3}
       propertyPath: m_AssetId
       value: af00479f96c5bc14e8230ace1d4c074a
+      objectReference: {fileID: 0}
+    - target: {fileID: 706313529074848049, guid: af00479f96c5bc14e8230ace1d4c074a, type: 3}
+      propertyPath: syncInterval
+      value: 0.016
       objectReference: {fileID: 0}
     - target: {fileID: 706313529074848051, guid: af00479f96c5bc14e8230ace1d4c074a, type: 3}
       propertyPath: m_RootOrder
