@@ -153,7 +153,7 @@ MonoBehaviour:
   syncMode: 0
   syncInterval: 0
   clientAuthority: 0
-  AlwaysTeleport: 1
+  AlwaysTeleport: 0
   localPositionSensitivity: 0.5
   localRotationSensitivity: 400
   localScaleSensitivity: 1

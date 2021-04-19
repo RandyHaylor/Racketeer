@@ -19,6 +19,7 @@ GameObject:
   - component: {fileID: 4826661368054536707}
   - component: {fileID: -9159588440204069813}
   - component: {fileID: 270775062448160961}
+  - component: {fileID: -416524984564676184}
   m_Layer: 0
   m_Name: Player4spaceModel
   m_TagString: Player
@@ -146,7 +147,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 950918175130138533}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 2f74aedd71d9a4f55b3ce499326d45fb, type: 3}
   m_Name: 
@@ -154,7 +155,7 @@ MonoBehaviour:
   syncMode: 0
   syncInterval: 0
   clientAuthority: 0
-  AlwaysTeleport: 1
+  AlwaysTeleport: 0
   localPositionSensitivity: 0.5
   localRotationSensitivity: 20
   localScaleSensitivity: 1
@@ -163,6 +164,7 @@ MonoBehaviour:
   interpolateScale: 0
   syncScale: 0
   syncRotation: 1
+  adjustForNetworkVariation: 0
 --- !u!54 &6528947439506926342
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -193,6 +195,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   syncMode: 0
   syncInterval: 0.1
+  stripCollidersIfNotServer: 0
 --- !u!114 &-9159588440204069813
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -200,13 +203,13 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 950918175130138533}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 83392ae5c1b731446909f252fd494ae4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   syncMode: 0
-  syncInterval: 0.016
+  syncInterval: 0
   target: {fileID: 6528947439506926342}
   clientAuthority: 0
   syncVelocity: 1
@@ -227,6 +230,31 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8caf74b285df1c2469db32a88c3c18b8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &-416524984564676184
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 950918175130138533}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 06f58b11a4e22e844bab3a6736dcddf2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncMode: 0
+  syncInterval: 0.016
+  clientAuthority: 0
+  bufferType: 2
+  interpolateNextFixedUpdate: 0
+  numberOfFramesToKeepInBuffer: 0
+  bufferLimit: 4
+  bufferTimeSeconds: 0
+  rigidBody: {fileID: 6528947439506926342}
+  syncRBVelocity: 1
+  syncRBAngularVelocity: 1
+  syncRBPosition: 1
+  syncRBRotation: 1
 --- !u!1001 &2491581035439687352
 PrefabInstance:
   m_ObjectHideFlags: 0

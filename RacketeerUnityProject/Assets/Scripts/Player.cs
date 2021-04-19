@@ -118,7 +118,7 @@ public class Player : NetworkBehaviour
     }
     IEnumerator AngularBoostTimer()
     {
-        Debug.Log("Started AngularBoostTimer Coroutine");
+        //Debug.Log("Started AngularBoostTimer Coroutine");
         yield return new WaitForSeconds(rotateBoostDuration);
         rotateBoostCoolingDown = true;
         rotateBoostActive = false;

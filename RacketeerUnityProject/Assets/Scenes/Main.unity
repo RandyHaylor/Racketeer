@@ -1762,6 +1762,7 @@ GameObject:
   - component: {fileID: 652688027}
   - component: {fileID: 652688026}
   - component: {fileID: 652688025}
+  - component: {fileID: 652688029}
   m_Layer: 0
   m_Name: NetorkManager
   m_TagString: Untagged
@@ -1791,7 +1792,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 652688024}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6b0fecffa3f624585964b0d0eb21b18e, type: 3}
   m_Name: 
@@ -1827,7 +1828,7 @@ MonoBehaviour:
   serverBatchInterval: 0
   offlineScene: 
   onlineScene: 
-  transport: {fileID: 652688026}
+  transport: {fileID: 652688029}
   networkAddress: 71.163.76.225
   maxConnections: 4
   disconnectInactiveConnections: 0
@@ -1863,6 +1864,30 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &652688029
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 652688024}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 872fa23ef6e77334ca452ce16f6cd091, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  port: 7777
+  LogType: 1
+  DebugDisplay: 0
+  serverBindsAll: 1
+  serverBindAddress: 
+  serverMaxPeerCapacity: 50
+  serverMaxNativeWaitTime: 1
+  clientMaxNativeWaitTime: 3
+  clientStatusUpdateInterval: -1
+  Channels: 0100000002000000
+  PacketBufferCapacity: 4096
+  MaxAllowedPacketSize: 33554432
 --- !u!1 &675459794
 GameObject:
   m_ObjectHideFlags: 0
@@ -2409,6 +2434,7 @@ MonoBehaviour:
   interpolateScale: 1
   syncScale: 1
   syncRotation: 1
+  adjustForNetworkVariation: 0
 --- !u!114 &829605346
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -8174,6 +8200,41 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 8
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1793089056 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 706313529074848055, guid: af00479f96c5bc14e8230ace1d4c074a, type: 3}
+  m_PrefabInstance: {fileID: 706313530780001079}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1793089057
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1793089056}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 06f58b11a4e22e844bab3a6736dcddf2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncMode: 0
+  syncInterval: 0.016
+  clientAuthority: 0
+  bufferType: 2
+  interpolateNextFixedUpdate: 0
+  numberOfFramesToKeepInBuffer: 0
+  bufferLimit: 4
+  bufferTimeSeconds: 0
+  rigidBody: {fileID: 1793089066}
+  syncRBVelocity: 1
+  syncRBAngularVelocity: 1
+  syncRBPosition: 1
+  syncRBRotation: 0
+--- !u!54 &1793089066 stripped
+Rigidbody:
+  m_CorrespondingSourceObject: {fileID: 706313529074848050, guid: af00479f96c5bc14e8230ace1d4c074a, type: 3}
+  m_PrefabInstance: {fileID: 706313530780001079}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &1949925100 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 7340174232481606103, guid: 15ff25f7762dbb348bf95edc0311eb60, type: 3}
@@ -8558,8 +8619,36 @@ PrefabInstance:
       value: af00479f96c5bc14e8230ace1d4c074a
       objectReference: {fileID: 0}
     - target: {fileID: 706313529074848049, guid: af00479f96c5bc14e8230ace1d4c074a, type: 3}
-      propertyPath: syncInterval
-      value: 0.016
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 706313529074848049, guid: af00479f96c5bc14e8230ace1d4c074a, type: 3}
+      propertyPath: AlwaysTeleport
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 706313529074848049, guid: af00479f96c5bc14e8230ace1d4c074a, type: 3}
+      propertyPath: bufferServerDeltaTime
+      value: 0.05
+      objectReference: {fileID: 0}
+    - target: {fileID: 706313529074848049, guid: af00479f96c5bc14e8230ace1d4c074a, type: 3}
+      propertyPath: localPositionSensitivity
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 706313529074848049, guid: af00479f96c5bc14e8230ace1d4c074a, type: 3}
+      propertyPath: adjustForNetworkVariation
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 706313529074848049, guid: af00479f96c5bc14e8230ace1d4c074a, type: 3}
+      propertyPath: bufferForStartOfServerDeltaTime
+      value: 0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 706313529074848049, guid: af00479f96c5bc14e8230ace1d4c074a, type: 3}
+      propertyPath: useSenderDeltaTimeToSpaceUpdates
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 706313529074848049, guid: af00479f96c5bc14e8230ace1d4c074a, type: 3}
+      propertyPath: factorForPacketTravelTimeVariation
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 706313529074848051, guid: af00479f96c5bc14e8230ace1d4c074a, type: 3}
       propertyPath: m_RootOrder
@@ -8608,6 +8697,18 @@ PrefabInstance:
     - target: {fileID: 706313529074848055, guid: af00479f96c5bc14e8230ace1d4c074a, type: 3}
       propertyPath: m_Name
       value: Sphere
+      objectReference: {fileID: 0}
+    - target: {fileID: 706313529074848061, guid: af00479f96c5bc14e8230ace1d4c074a, type: 3}
+      propertyPath: stripCollidersIfnotServer
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 706313529074848063, guid: af00479f96c5bc14e8230ace1d4c074a, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 706313529074848063, guid: af00479f96c5bc14e8230ace1d4c074a, type: 3}
+      propertyPath: syncVelocity
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: af00479f96c5bc14e8230ace1d4c074a, type: 3}

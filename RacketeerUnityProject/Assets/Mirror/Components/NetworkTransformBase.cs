@@ -17,6 +17,7 @@
 //   interpolation. interpolation over time is never that good.
 //
 using System;
+using System.Collections;
 using UnityEngine;
 
 namespace Mirror
@@ -72,7 +73,16 @@ namespace Mirror
         [Tooltip("Disable to never sync transform rotation")]
         public bool syncRotation = true;
 
+        //prevent out of order updates from being applied
         float previousSenderTimeStamp = 0;
+
+
+
+        public bool adjustForNetworkVariation = false;
+        float initialSenderTimeOffset = 0;
+        bool firstDataPointReceived = false;
+        float AverageTimeOffsetSenderVsReceiver = 0;
+        float timeOffsetSenderVsReceiver = 0;
 
         // target transform to sync. can be on a child.
         protected abstract Transform targetComponent { get; }
@@ -159,16 +169,6 @@ namespace Mirror
                 timeStamp = Time.time,
                 senderTimeStamp = reader.ReadSingle()
             };
-
-            if (temp.senderTimeStamp < previousSenderTimeStamp)
-            {
-                Debug.Log("abandoned out-of-order NetworkTransform update (senderTimeStamp on new update was older than previously sent time");
-                return;
-            }
-            else
-                previousSenderTimeStamp = temp.senderTimeStamp;
-
-
             if (syncScale)
             {
                 // Reader length is checked here, 12 is used as thats the current Vector3 (3 floats) amount.
@@ -176,6 +176,42 @@ namespace Mirror
                 if (reader.Length >= 13) { temp.localScale = reader.ReadVector3(); }
                 else { Debug.LogWarning("Reader length does not contain enough data for a scale, please check that both server and client builds syncScale booleans match.", this); }
             }
+
+            if (temp.senderTimeStamp < previousSenderTimeStamp)
+            {
+                Debug.Log("abandoned out-of-order NetworkTransform update (senderTimeStamp on new update was older than previously sent time");
+                return;
+            }
+            else
+            {
+                previousSenderTimeStamp = temp.senderTimeStamp;
+            }
+
+            //adjust timeStamp of new data point to factor in for variation in network travel time vs base
+    
+            if (firstDataPointReceived)
+            {                    
+                firstDataPointReceived = true;
+                initialSenderTimeOffset = temp.senderTimeStamp - Time.time;
+                AverageTimeOffsetSenderVsReceiver = initialSenderTimeOffset;
+                StartCoroutine(AverageServerToHostTimeOffset());
+                Debug.Log("Received first dataPoint, initialSenderTimeOffset: " + initialSenderTimeOffset);
+            }
+            if (adjustForNetworkVariation)
+            {
+                {
+                    temp.timeStamp = temp.senderTimeStamp - AverageTimeOffsetSenderVsReceiver;
+                }
+            }
+
+            ApplyDataPoint(temp);
+
+        }
+
+
+        void ApplyDataPoint(DataPoint temp)
+        {
+
 
             // movement speed: based on how far it moved since last time
             // has to be calculated before 'start' is overwritten
@@ -188,7 +224,7 @@ namespace Mirror
             {
                 start = new DataPoint
                 {
-                    timeStamp = Time.time - (syncInterval/2),
+                    timeStamp = Time.time - (syncInterval / 2),
                     // local position/rotation for VR support
                     localPosition = targetComponent.localPosition,
                     localRotation = targetComponent.localRotation,
@@ -226,7 +262,7 @@ namespace Mirror
             //              C
             //
             else
-            {                
+            {
                 float newDistance = Vector3.Distance(goal.localPosition, temp.localPosition);
 
                 start = goal;
@@ -245,6 +281,28 @@ namespace Mirror
 
             // set new destination in any case. new data is best data.
             goal = temp;
+        }
+
+        IEnumerator AverageServerToHostTimeOffset()
+        {
+            float[] timeOffset = new float[10];
+            for (int i = 0; i < timeOffset.Length; i++) //initial value fills array
+            {
+                timeOffset[i] = timeOffsetSenderVsReceiver;
+            }
+
+            for (int i = 0; i < timeOffset.Length; i++)
+            {
+                timeOffset[i] = timeOffsetSenderVsReceiver;
+
+                float sum = 0;
+                for (int j = 0; j < timeOffset.Length; j++) //set timeOffset to average of array
+                { sum += timeOffset[j]; }
+                AverageTimeOffsetSenderVsReceiver = sum / timeOffset.Length;
+
+                yield return new WaitForSeconds(0.5f);
+            }
+            Debug.Log("Final Average Time Offset From Server: " + AverageTimeOffsetSenderVsReceiver);
         }
 
         public override void OnDeserialize(NetworkReader reader, bool initialState)
