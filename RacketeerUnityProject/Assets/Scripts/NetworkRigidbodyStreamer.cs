@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class NetworkRigidbodyStreamer : NetworkBehaviour
 {
+    public bool debugByGameObjectName;
+    public string debuggingTargetGameObjName = "Sphere";
     //used to provide a constant stream of data for a critical game object
     //  intended for a server-side physics sim that streams positions/physics info to all clients every fixed update
     [Header("Authority")]
@@ -22,7 +24,8 @@ public class NetworkRigidbodyStreamer : NetworkBehaviour
 
     [Header("NetworkTimeBuffer")]
     [Tooltip("Uses synced network time to wait for processing")]
-    public double bufferTimeSeconds = 0.05f;
+    public double bufferTimeSeconds = 0.0;
+    public byte maxFrameBufferBeforeReset = 5;
 
     [Header("Syncing")]
     [Tooltip("Data is sent whether checked or not (for live testing)")]
@@ -34,10 +37,12 @@ public class NetworkRigidbodyStreamer : NetworkBehaviour
 
     //time syncing server => client
     bool recievedFirstUpdate = false;
-    double ownerToObserverTimeDifference = 0;
     double localTimeOfLastAppliedUpdate;
     double networkTimeOfLastAppliedUpdate;
     double cachedTargetNextUpdateTime;
+
+    bool updateRun; //not currently used, but identifies fixedUpdates that did not get a physics update from obj authority.  was for an abandoned interpolation script that isn't needed because local physics engine handles that...
+
 
     public enum BufferType
     {
@@ -67,16 +72,15 @@ public class NetworkRigidbodyStreamer : NetworkBehaviour
         updateBuffer = new LinkedList<UpdateRibidbodyItem>();
         updateHistory = new LinkedList<UpdateRibidbodyItem>();
     }
-    bool updateRun;
+
     // Update is called once per frame
     private void Update()
     {
-        //if (gameObject.name == "Sphere") Debug.Log("Update() check: UpdateRunLastFrame? " + updateRun + " Server? " + isServer);
+        //if (gameObject.name == debuggingTargetGameObjName) Debug.Log("Update() check: UpdateRunLastFrame? " + updateRun + " Server? " + isServer);
     }
     void FixedUpdate()
     {
-        //if (gameObject.name == "Sphere") Debug.Log("FixedUpdate() check: UpdateRunLastFrame? " + updateRun + " Server? " + isServer);
-        if (gameObject.name == "Sphere") Debug.Log("updateBuffer.Count: " + updateBuffer.Count);
+        if (debugByGameObjectName && gameObject.name == debuggingTargetGameObjName && ((int)Time.time)%2 == 0) Debug.Log("updateBuffer.Count: " + updateBuffer.Count);
         //recipient state
         if ((isServer && clientAuthority)||(!isServer && !clientAuthority))
         {
@@ -84,8 +88,12 @@ public class NetworkRigidbodyStreamer : NetworkBehaviour
                 ApplyBufferedUpdates();
             else if (!updateRun) 
             { 
-                Debug.Log("updateRun false and no buffer used in fixed update for recipient. Running InterpolateNextState()");
-                if (interpolateNextFixedUpdate) InterpolateNextState(); 
+                if (debugByGameObjectName && gameObject.name == debuggingTargetGameObjName) Debug.Log("updateRun false and no buffer used in fixed update for recipient.");
+            }
+
+            if (localTimeOfLastAppliedUpdate < Time.time + bufferTimeSeconds - 1) //if we're more than a full second behind sync, reset
+            {
+                recievedFirstUpdate = false;
             }
         }
         else //owner state
@@ -101,8 +109,12 @@ public class NetworkRigidbodyStreamer : NetworkBehaviour
         //UNTESTED... needs to be tested with clientAuthority on
         if (NetworkServer.connections.Count > 0 && !isClient) //if a client is sending to a dedicated server, that should update it's own buffer
         {
-            Debug.Log("I think im' a dedicated server");
-            if (networkTime < lastUpdateNetworktime) { Debug.Log("Ignoring an out of order NetworkTime.time update"); return; } //don't apply out of order updates - ignore them
+            //Debug.Log("I think im' a dedicated server");
+            if (networkTime < lastUpdateNetworktime) 
+            { 
+                //Debug.Log("Ignoring an out of order NetworkTime.time update"); 
+                return; 
+            } //don't apply out of order updates - ignore them
             lastUpdateNetworktime = networkTime;
 
 
@@ -123,7 +135,11 @@ public class NetworkRigidbodyStreamer : NetworkBehaviour
             return;
         }
 
-        if (networkTime < lastUpdateNetworktime){ Debug.Log("Ignoring an out of order NetworkTime.time update"); return; } //don't apply out of order updates - ignore them
+        if (networkTime < lastUpdateNetworktime)
+        { 
+            if(debugByGameObjectName && gameObject.name == debuggingTargetGameObjName) Debug.Log("Ignoring an out of order NetworkTime.time update"); 
+            return;  //don't apply out of order updates - ignore them
+        }
         
         lastUpdateNetworktime = networkTime;
 
@@ -173,14 +189,13 @@ public class NetworkRigidbodyStreamer : NetworkBehaviour
 
             if (updateBuffer.Count < numberOfFramesToKeepInBuffer || updateBuffer.Count == 0)
             {                
-                if (gameObject.name == "Sphere") Debug.Log("UpdateBuffer count was 0 or less than currentBufferFrames: " + updateBuffer.Count);
-                if (interpolateNextFixedUpdate) InterpolateNextState(); //uses previous velocity to calculate a new position
+                if (debugByGameObjectName &&  gameObject.name == debuggingTargetGameObjName) Debug.Log("UpdateBuffer count was 0 or less than currentBufferFrames: " + updateBuffer.Count);
                 return;
             }
 
             if (updateBuffer.Count > bufferLimit && !shiftingBufferCountBackToTarget) //if we detect buffer is over limit, reduce buffer by 1 each frame until ideal buffer size reached
             {
-                if (gameObject.name == "Sphere") Debug.Log("shifting buffer count back to target set to true. bufferCount: " + updateBuffer.Count + " bufferLimit: " + bufferLimit);
+                if (gameObject.name == debuggingTargetGameObjName) Debug.Log("shifting buffer count back to target set to true. bufferCount: " + updateBuffer.Count + " bufferLimit: " + bufferLimit);
                 shiftingBufferCountBackToTarget = true;
             }
 
@@ -189,11 +204,11 @@ public class NetworkRigidbodyStreamer : NetworkBehaviour
                 if (updateBuffer.Count > 1)
                 {
                     updateBuffer.RemoveFirst(); //causing this loop to skip a frame/update
-                    if (gameObject.name == "Sphere") Debug.Log("FrameCountBuffer: Removed update from buffer, new updateBuffer.Count: " + updateBuffer.Count);
+                    if (gameObject.name == debuggingTargetGameObjName) Debug.Log("FrameCountBuffer: Removed update from buffer, new updateBuffer.Count: " + updateBuffer.Count);
                 }
                 if (updateBuffer.Count <= numberOfFramesToKeepInBuffer || updateBuffer.Count <2)
                 {
-                    if (gameObject.name == "Sphere") Debug.Log("FrameCountBuffer: last update removal caused buffercount to reach target");
+                    if (gameObject.name == debuggingTargetGameObjName) Debug.Log("FrameCountBuffer: last update removal caused buffercount to reach target");
                     shiftingBufferCountBackToTarget = false;
                 }
             }
@@ -202,12 +217,7 @@ public class NetworkRigidbodyStreamer : NetworkBehaviour
         {
             if (updateBuffer.Count == 0)
             {
-                if (updateBuffer.Count == 0)
-                {
-                    if (interpolateNextFixedUpdate) InterpolateNextState(); //uses previous velocity to calculate a new position
-                    if (gameObject.name == "Sphere") Debug.Log("networkTime buffer: updateBuffer.Count == 0");
-                }
-
+                if (debugByGameObjectName && gameObject.name == debuggingTargetGameObjName) Debug.Log("networkTime buffer: updateBuffer.Count == 0");
                 return;
             }
 
@@ -216,7 +226,7 @@ public class NetworkRigidbodyStreamer : NetworkBehaviour
                 networkTimeOfLastAppliedUpdate = updateBuffer.First.Value.networkTime;
                 localTimeOfLastAppliedUpdate = Time.timeAsDouble + bufferTimeSeconds; //adding a frame as buffer   // + (double)Time.fixedDeltaTime
                 recievedFirstUpdate = true;
-                if (gameObject.name == "Sphere") Debug.Log("networkTime buffer: reset times (Time.fixedDeltaTime: " +Time.fixedDeltaTime);
+                if (gameObject.name == debuggingTargetGameObjName) Debug.Log("networkTime buffer: reset times (Time.fixedDeltaTime: " +Time.fixedDeltaTime);
             }
 
             cachedTargetNextUpdateTime = networkTimeOfLastAppliedUpdate + Time.timeAsDouble - localTimeOfLastAppliedUpdate;
@@ -224,25 +234,34 @@ public class NetworkRigidbodyStreamer : NetworkBehaviour
 
             if (updateBuffer.First.Value.networkTime > cachedTargetNextUpdateTime + (double)Time.fixedDeltaTime) //too soon
             {
-                if (gameObject.name == "Sphere") Debug.Log("networkTime buffer: too soon, waiting until next frame to apply");
+                if (gameObject.name == debuggingTargetGameObjName) Debug.Log("networkTime buffer: too soon, waiting until next frame to apply");
                 return;
             }
+
             while (updateBuffer.Count > 0 && updateBuffer.First.Value.networkTime < cachedTargetNextUpdateTime - (double)Time.fixedDeltaTime) //discard late updates until last update
             {
-                if (gameObject.name == "Sphere") Debug.Log("networkTime buffer: too late... dropping frame upate");
+                if (gameObject.name == debuggingTargetGameObjName) Debug.Log("networkTime buffer: too late... dropping frame upate");
                 updateBuffer.RemoveFirst();
                 if (updateBuffer.Count == 0)
                 {
                     recievedFirstUpdate = false; //the next update will reset timing
-                    if (gameObject.name == "Sphere") Debug.Log("buffer cleared, next update will reset timing");
+                    if (gameObject.name == debuggingTargetGameObjName) Debug.Log("buffer cleared, next update will reset timing");
                 }
                     
+            }
+
+            if (updateBuffer.Count > maxFrameBufferBeforeReset)
+            {
+                if (gameObject.name == debuggingTargetGameObjName) Debug.Log("max frame buffer reached, resetting");
+                updateBuffer.Clear();
+                recievedFirstUpdate = false; //the next update will reset timing
+                return;
             }
             //if neither previous case applies, continue to apply the buffered update
 
         }
         else
-            Debug.Log("ERROR THIS SHOULDN'T BE RUNNING...");
+            Debug.Log("ERROR THIS SHOULDN'T BE RUNNING...  Review ApplyBufferedUpdates() in NetworkRigidbodyStreamer.cs");
 
 
         if (updateBuffer.Count > 0)
@@ -268,20 +287,11 @@ public class NetworkRigidbodyStreamer : NetworkBehaviour
         localTimeOfLastAppliedUpdate = Time.timeAsDouble;
         networkTimeOfLastAppliedUpdate = networkTime;
         updateRun = true;
-        //if (gameObject.name == "Sphere") Debug.Log("just set updateRun to true for Sphere");
+        //if (debugByGameObjectName && gameObject.name == debuggingTargetGameObjName) Debug.Log("just set updateRun to true for Sphere");
         if (syncRBVelocity) rigidBody.velocity = rigidBodyVelocity;
         if (syncRBAngularVelocity) rigidBody.angularVelocity = rigidBodyAngularVelocity;
         if (syncRBPosition) rigidBody.position = rigidBodyPosition;
         if (syncRBRotation) rigidBody.rotation = rigidBodyRotation;
-    }
-
-    void InterpolateNextState()
-    {        
-        if (updateHistory == null) updateHistory = new LinkedList<UpdateRibidbodyItem>();
-        if (gameObject.name == "Sphere") Debug.Log("InterpolateNextState() started, udpateHistory count: " + updateHistory.Count);
-        if (updateHistory.Count < 1) return;
-        if (gameObject.name == "Sphere") Debug.Log("Interpolating next position state");
-        rigidBody.position += updateHistory.First.Value.rigidBodyVelocity * Time.deltaTime;
     }
 }
 

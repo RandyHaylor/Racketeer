@@ -244,12 +244,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   syncMode: 0
   syncInterval: 0.016
+  debugByGameObjectName: 0
+  debuggingTargetGameObjName: Sphere
   clientAuthority: 0
   bufferType: 2
   interpolateNextFixedUpdate: 0
   numberOfFramesToKeepInBuffer: 0
   bufferLimit: 4
-  bufferTimeSeconds: 0
+  bufferTimeSeconds: -0.05
+  maxFrameBufferBeforeReset: 6
   rigidBody: {fileID: 5619756305628283420}
   syncRBVelocity: 1
   syncRBAngularVelocity: 1
