@@ -8219,15 +8219,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   syncMode: 0
   syncInterval: 0.016
-  debugByGameObjectName: 0
-  debuggingTargetGameObjName: Sphere
+  debugWithThisObject: 0
   clientAuthority: 0
   bufferType: 2
-  interpolateNextFixedUpdate: 0
   numberOfFramesToKeepInBuffer: 0
   bufferLimit: 4
-  bufferTimeSeconds: -0.05
-  maxFrameBufferBeforeReset: 6
+  networkTimeFramesToBuffer: 2
+  maxFrameBufferBeforeReset: 10
   rigidBody: {fileID: 1793089066}
   syncRBVelocity: 1
   syncRBAngularVelocity: 1
@@ -8252,6 +8250,23 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   syncMode: 0
   syncInterval: 0.016
+--- !u!114 &1793089072
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1793089056}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bfe035f6f4093e64a8b19c29757f8f3f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncMode: 0
+  syncInterval: 0.016
+  playerPing: 0.5
+  pingsToAverage: 5
+  pingSampleInterval: 1
 --- !u!4 &1949925100 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 7340174232481606103, guid: 15ff25f7762dbb348bf95edc0311eb60, type: 3}

@@ -20,6 +20,7 @@ GameObject:
   - component: {fileID: 3664319391219272773}
   - component: {fileID: -5318047262728979191}
   - component: {fileID: -7027387818053288177}
+  - component: {fileID: 2192069653970948955}
   m_Layer: 0
   m_Name: Player3spaceModel
   m_TagString: Player
@@ -244,20 +245,38 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   syncMode: 0
   syncInterval: 0.016
-  debugByGameObjectName: 0
-  debuggingTargetGameObjName: Sphere
+  debugWithThisObject: 0
   clientAuthority: 0
   bufferType: 2
   interpolateNextFixedUpdate: 0
   numberOfFramesToKeepInBuffer: 0
   bufferLimit: 4
-  bufferTimeSeconds: -0.05
-  maxFrameBufferBeforeReset: 6
+  networkTimeFramesToBuffer: 2
+  factorPlayerPingInBufferTime: 0
+  maxFrameBufferBeforeReset: 10
+  bufferedTimeOffsetOwnerObserver: 0.03333
   rigidBody: {fileID: 5619756305628283420}
   syncRBVelocity: 1
   syncRBAngularVelocity: 1
   syncRBPosition: 1
   syncRBRotation: 1
+--- !u!114 &2192069653970948955
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1897227679105932991}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bfe035f6f4093e64a8b19c29757f8f3f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncMode: 0
+  syncInterval: 0.016
+  playerPing: 0.05
+  pingsToAverage: 5
+  pingSampleInterval: 1
 --- !u!1001 &6483984317485753201
 PrefabInstance:
   m_ObjectHideFlags: 0
