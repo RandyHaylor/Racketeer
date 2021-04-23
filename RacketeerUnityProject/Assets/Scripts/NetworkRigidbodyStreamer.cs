@@ -251,7 +251,7 @@ public class NetworkRigidbodyStreamer : NetworkBehaviour
                 return;
             }
 
-            while (updateBuffer.Count > 0 && updateBuffer.First.Value.networkTime < Time.timeAsDouble + bufferedTimeOffsetOwnerObserver - (double)(3.5*Time.fixedDeltaTime)) //discard updates more than two frames behind
+            while (updateBuffer.Count > 0 && updateBuffer.First.Value.networkTime < Time.timeAsDouble + bufferedTimeOffsetOwnerObserver - (double)(5.5*Time.fixedDeltaTime)) //discard updates more than two frames behind
             {
                 if (debugWithThisObject && gameObject.name == debuggingTargetGameObjName) Debug.Log("networkTime buffer: too late... dropping frame upate" + " Time.time: " + Time.time);
                 updateBuffer.RemoveFirst();
