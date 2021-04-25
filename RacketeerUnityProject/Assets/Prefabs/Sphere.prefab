@@ -21,6 +21,10 @@ GameObject:
   - component: {fileID: 706313529074848063}
   - component: {fileID: 706313529074848059}
   - component: {fileID: 706313529074848058}
+  - component: {fileID: 1793089057}
+  - component: {fileID: 1793089058}
+  - component: {fileID: 1793089071}
+  - component: {fileID: 1793089073}
   m_Layer: 0
   m_Name: Sphere
   m_TagString: Ball
@@ -145,7 +149,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 706313529074848055}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 2f74aedd71d9a4f55b3ce499326d45fb, type: 3}
   m_Name: 
@@ -153,7 +157,7 @@ MonoBehaviour:
   syncMode: 0
   syncInterval: 0
   clientAuthority: 0
-  AlwaysTeleport: 0
+  AlwaysTeleport: 1
   localPositionSensitivity: 0.5
   localRotationSensitivity: 400
   localScaleSensitivity: 1
@@ -162,6 +166,7 @@ MonoBehaviour:
   interpolateScale: 0
   syncScale: 0
   syncRotation: 0
+  adjustForNetworkVariation: 0
 --- !u!114 &706313529074848062
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -191,6 +196,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   syncMode: 0
   syncInterval: 0.1
+  stripCollidersIfNotServer: 0
 --- !u!114 &706313529074848060
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -212,7 +218,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 706313529074848055}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 83392ae5c1b731446909f252fd494ae4, type: 3}
   m_Name: 
@@ -255,6 +261,78 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   syncMode: 0
   syncInterval: 0.1
+--- !u!114 &1793089057
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 706313529074848055}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 06f58b11a4e22e844bab3a6736dcddf2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncMode: 0
+  syncInterval: 0.016
+  debugWithThisObject: 0
+  clientAuthority: 0
+  bufferType: 2
+  numberOfFramesToKeepInBuffer: 0
+  bufferLimit: 4
+  networkTimeFramesToBuffer: 2
+  maxFrameBufferBeforeReset: 10
+  rigidBody: {fileID: 706313529074848050}
+  syncRBVelocity: 1
+  syncRBAngularVelocity: 1
+  syncRBPosition: 1
+  syncRBRotation: 0
+--- !u!114 &1793089058
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 706313529074848055}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6090da511f8374135a15dd8655adcd44, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _recordingInterval: 0.01666
+  _mode: 1
+  _globalClockKey: BallAndPlayers
+  _rewindable: 1
+  _recordingDuration: 3
+--- !u!114 &1793089071
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 706313529074848055}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: df7c9bd5e909acb4a917b83c98d594ef, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncMode: 0
+  syncInterval: 0.016
+--- !u!114 &1793089073
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 706313529074848055}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 531d390122e2f7d4cb3935d8ecceabb7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncMode: 0
+  syncInterval: 0.016
+  speedLimit: 13
 --- !u!1 &706313530329610087
 GameObject:
   m_ObjectHideFlags: 0

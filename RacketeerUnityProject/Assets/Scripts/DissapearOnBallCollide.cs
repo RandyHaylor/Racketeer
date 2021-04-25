@@ -8,14 +8,18 @@ public class DissapearOnBallCollide : NetworkBehaviour
     public AudioClip collectedSound;
     bool beingDestroyed = false;
     public GameObject explosionPrefab;
- 
+    public bool spanwNewCoinWhenCollected = true;
+
+
     private void OnTriggerEnter(Collider other)
-    {        
+    {
+        //Debug.Log("Coin triggerEnter detected, object: " + other.gameObject.tag + " isServer? " + isServer + " playerOwningBall: " + GameManager.Instance.playerNumberOwningBall);
         if (isServer && GameManager.Instance.playerNumberOwningBall >= 0 && !beingDestroyed && other.gameObject.tag == "Ball") // ball only has collider on server, so this only runs on server
         {
+            //Debug.Log("Coin being removed");
             beingDestroyed = true;
             CmdPlaySound();
-            CoinSpawner.SpawnNewCoin();
+            if (spanwNewCoinWhenCollected) CoinSpawner.SpawnNewCoin();
             StartCoroutine(DestroyAfterTime(0.05f, GameManager.Instance.playerNumberOwningBall));
             GameManager.AddPointForOwningPlayer();
         }
@@ -24,7 +28,7 @@ public class DissapearOnBallCollide : NetworkBehaviour
     IEnumerator DestroyAfterTime(float time, int playerNumber)
     {
         yield return new WaitForSeconds(time);
-        Debug.Log("loading xplosion for player: " + playerNumber);
+        //Debug.Log("loading xplosion for player: " + playerNumber);
         GameObject.Instantiate(GameManager.Instance.playerExplosions[playerNumber], gameObject.transform.position, Quaternion.identity);
         RpcLoadExplosion(playerNumber);
         Destroy(this.gameObject);

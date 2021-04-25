@@ -48,9 +48,16 @@ public class GameManager : NetworkBehaviour
     public Button RoundStartBtn;
     bool roundActive = false;
 
+    public Button LevelStartBtn;
+    public LevelManager levelManager;
+    bool levelActive = false;
+
     private static GameManager _instance;
+    public NetworkManager networkManager;
 
 
+    public GameObject coinPrefab;
+    GameObject newCoin;
 
     public static GameManager Instance
     {
@@ -66,7 +73,9 @@ public class GameManager : NetworkBehaviour
     void Awake()
     {
         _instance = this;
+        networkManager = FindObjectOfType<NetworkManager>();
     }
+
     [Server]
     void Start()
     {
@@ -84,6 +93,35 @@ public class GameManager : NetworkBehaviour
         StartCoroutine(RandomizeGravity(randomizeGravityMinSeconds, randomizeGravityMaxSeconds));
     }
 
+    /*
+    IEnumerator ReportInfo()
+    {
+        while (true)
+        {
+            Debug.Log("Application.isFocused: " + Application.isFocused);
+            Debug.Log("timeScale: " + Time.timeScale);
+            Debug.Log("captureFramerate: " + Time.captureFramerate);
+            Debug.Log("deltaTime: " + Time.deltaTime);
+            Debug.Log("fixedDeltaTime: " + Time.fixedDeltaTime);
+            Debug.Log("Time.time: " + Time.time);
+            Debug.Log("Application.targetFrameRate: " + Application.targetFrameRate);
+
+            yield return new WaitForSeconds(1);
+        }
+    }
+
+    void OnApplicationFocus(bool hasFocus)
+    {
+        if (hasFocus)
+        {
+            Debug.Log("Gained focus");
+        }
+        else
+        {
+            Debug.Log("Lost focus");
+        }
+    }
+    */
 
     IEnumerator RandomizeGravity(float minTime, float maxTime)
     {
@@ -142,6 +180,20 @@ public class GameManager : NetworkBehaviour
     // Update is called once per frame
     void Update()
     {
+        /*  Caused issues going full screen - basically broke game...
+        if (Input.GetKeyDown(KeyCode.Escape) && !Application.isEditor)
+        {
+            if (Screen.fullScreen)
+            {
+                Screen.SetResolution(1280, 720, false);
+            }
+            else
+            {
+                Screen.SetResolution(1920, 1080, true);
+            }
+        }
+        */
+
         /*
         if (Input.GetKeyDown(KeyCode.Escape))
         {
@@ -179,7 +231,94 @@ public class GameManager : NetworkBehaviour
         _previousRotation = wallsTransform.localRotation;
         _targetRotation = Quaternion.Euler(angles);
     }
+
+
+    public void StartLevel()
+    {
+        CmdStartLevel();
+    }
+
+    [Command(requiresAuthority = false)]
+    void CmdStartLevel()
+    {
+        if (levelActive || roundActive)
+            return;
+
+        levelActive = true;
+
+        var coins = GameObject.FindGameObjectsWithTag("Coin");
+        ResetPlayerScores();
+        foreach (var coin in coins) Destroy(coin);
+
+        levelManager.StartLevel();
+
+        CameraFollowsPlayer(true);
+
+        SoundManager.PlayLevelMusic();
+    }
+
+    public static void EndLevel()
+    {
+        _instance.EndLevelInt();
+    }
+    void EndLevelInt()
+    {
+        SoundManager.StopLevelMusic();
+        levelActive = false;
+        levelManager.ResetLevel();
+        MovePlayersToSpawnPoints();
+        LoadRoundCoins();
+        MoveSphereToCenter();
+        ResetCamera();
+    }
+    void ResetCamera()
+    {
+        Camera.main.GetComponent<SmoothCamera2D>().target = null;
+        RpcResetCamera();
+    }
+    [ClientRpc] void RpcResetCamera() => Camera.main.GetComponent<SmoothCamera2D>().target = null;
     
+    void MoveSphereToCenter()
+    {
+        GameObject.FindGameObjectWithTag("Ball").GetComponent<Rigidbody>().velocity = Vector3.zero;
+        GameObject.FindGameObjectWithTag("Ball").transform.position = Vector3.zero;
+    }
+
+    void LoadRoundCoins()
+    {
+        var roundCoinSpawns = GameObject.FindGameObjectsWithTag("RoundCoinSpawn");
+        foreach (var coinSpawnPoint in roundCoinSpawns)
+        {
+                newCoin = GameObject.Instantiate(coinPrefab, coinSpawnPoint.transform.position, coinSpawnPoint.transform.rotation);
+                newCoin.GetComponent<DissapearOnBallCollide>().spanwNewCoinWhenCollected = true;
+                NetworkServer.Spawn(newCoin);
+        }
+    }
+
+    void MovePlayersToSpawnPoints()
+    {
+        var players = GameObject.FindGameObjectsWithTag("Player");
+        var respawns = GameObject.FindGameObjectsWithTag("Respawn");
+        for (int i = 0; i < players.Length; i++)
+        {
+            players[i].GetComponent<Rigidbody>().velocity = Vector3.zero;
+            players[i].GetComponent<Rigidbody>().angularVelocity = Vector3.zero;
+            players[i].transform.position = respawns[i].transform.position;
+        }
+    }
+
+    [ClientRpc]
+    void CameraFollowsPlayer(bool state)
+    {
+        var players = GameObject.FindGameObjectsWithTag("Player");
+        foreach (var player in players)
+        {
+            if (player.GetComponent<Player>().isLocalPlayer)
+                Camera.main.GetComponent<SmoothCamera2D>().target = player.transform;
+        }
+    }
+
+
     public void StartNewRound()
     {
         CmdStartNewRound(defaultRoundTime);
@@ -202,9 +341,10 @@ public class GameManager : NetworkBehaviour
     void CmdStartNewRound(int roundTimeFromClient)
     {
         Debug.Log("Called CmdStartnewRound(" + roundTimeFromClient + ")");
-        if (roundActive)
+
+        if (roundActive || levelActive)
         {
-            Debug.Log("calling CmdStartNewRound() when roundActive is true...");
+            Debug.Log("calling CmdStartNewRound() when roundActive or levelActive is true...");
             return;
         }
 
@@ -251,7 +391,7 @@ public class GameManager : NetworkBehaviour
         CenterCountdownTextGameObject.SetActive(false); 
         RpcEnableCenterCountdownTimer(false);
 
-        //start round music on server and clients
+       //start round music on server and clients
         SoundManager.PlayRoundMusic();
 
 
@@ -336,9 +476,14 @@ public class GameManager : NetworkBehaviour
 
     private void _AddPointForOwningPlayer()
     {
-        if (playerNumberOwningBall < 0 || !roundActive) return;
-        playerScores[playerNumberOwningBall] += 1;
-        UpdatePlayerScores();
+        if (playerNumberOwningBall > -1 && (roundActive || levelActive))
+        {
+            playerScores[playerNumberOwningBall] += 1;
+            UpdatePlayerScores();
+            if (levelActive)
+                levelManager.CoinCollected();
+        }
+
     }
     [Server]
     void UpdatePlayerScores()

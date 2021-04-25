@@ -20,7 +20,7 @@ GameObject:
   - component: {fileID: 5852367113486498375}
   - component: {fileID: 8449501310827497760}
   - component: {fileID: -3614700075354779908}
-  - component: {fileID: 7061196406996481658}
+  - component: {fileID: -1796876523799633059}
   m_Layer: 0
   m_Name: Player1spaceModel
   m_TagString: Player
@@ -246,19 +246,16 @@ MonoBehaviour:
   debugWithThisObject: 0
   clientAuthority: 0
   bufferType: 2
-  interpolateNextFixedUpdate: 0
   numberOfFramesToKeepInBuffer: 0
   bufferLimit: 4
   networkTimeFramesToBuffer: 2
-  factorPlayerPingInBufferTime: 0
   maxFrameBufferBeforeReset: 10
-  bufferedTimeOffsetOwnerObserver: 0.03333
   rigidBody: {fileID: 5852367113486498330}
   syncRBVelocity: 1
   syncRBAngularVelocity: 1
   syncRBPosition: 1
   syncRBRotation: 1
---- !u!114 &7061196406996481658
+--- !u!114 &-1796876523799633059
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -267,14 +264,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 5852367113486498306}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: bfe035f6f4093e64a8b19c29757f8f3f, type: 3}
+  m_Script: {fileID: 11500000, guid: 6090da511f8374135a15dd8655adcd44, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  syncMode: 0
-  syncInterval: 0.016
-  playerPing: 0.05
-  pingsToAverage: 5
-  pingSampleInterval: 1
+  _recordingInterval: 0.01666
+  _mode: 1
+  _globalClockKey: BallAndPlayers
+  _rewindable: 1
+  _recordingDuration: 3
 --- !u!1001 &5155902650348605246
 PrefabInstance:
   m_ObjectHideFlags: 0

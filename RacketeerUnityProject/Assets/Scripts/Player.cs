@@ -18,6 +18,7 @@ public class Player : NetworkBehaviour
     float rotate;
     float rotateMult = -600f;
     float triggerAxis;
+    bool abilityButtonDown;
 
     float rotateBoostDuration = 0.1f;
     bool rotateBoostActive = false;
@@ -29,6 +30,8 @@ public class Player : NetworkBehaviour
     float velocityBoostDuration = 0.1f;
     float velocityBoostCooldown = 1f;
     bool velocityBoostCoolingDown = false;
+
+    PlayerAbility playerAbility;
 
     Vector3 movement;
     bool velocityBoostInput;
@@ -44,7 +47,7 @@ public class Player : NetworkBehaviour
     }
     void HandleMovement()
     {
-        if (isLocalPlayer && isClient)
+        if (isLocalPlayer)
         {
             moveHorizontal = Mathf.Clamp(Input.GetAxis("LeftStickHorizontal") + Input.GetAxis("Horizontal"), -1, 1);
             moveVertical = Mathf.Clamp(Input.GetAxis("LeftStickVertical") + Input.GetAxis("Vertical"), -1, 1);
@@ -76,7 +79,7 @@ public class Player : NetworkBehaviour
             }*/
 
             //rotational boost code (triggers)
-            triggerAxis = Input.GetAxis("triggerAxis");
+            triggerAxis = Input.GetAxis("RightTriggerAxis");
 
             if (triggerAxis > 0.1f && !rotateBoostCoolingDown && !rotateBoostActive) //Math.Abs(triggerAxis)
             {
@@ -92,12 +95,15 @@ public class Player : NetworkBehaviour
                 velocityBoostActive = true;
                 StartCoroutine(VelocityBoostTimer());
                 StartCoroutine(AngularBoostTimer());
-                if (isLocalPlayer) SoundManager.PlaySound(PlayerBoostSoundClip, 0.25f, 0.5f);
+                if (isLocalPlayer) SoundManager.PlaySound(PlayerBoostSoundClip, 0.25f, 0.4f, true);
                 CmdPlayerBoostSoundOtherPlayers();
                 CmdPlayerBoostParticles();
                 
             }
-            CmdApplyForceOnServer(movement, rotate, rotateBoostActive, velocityBoostActive);
+
+            abilityButtonDown = (Input.GetAxis("LeftTriggerAxis") > 0.1f);
+
+            CmdApplyInputOnServer(movement, rotate, rotateBoostActive, velocityBoostActive, abilityButtonDown);
             
         }
     }
@@ -105,7 +111,7 @@ public class Player : NetworkBehaviour
     [ClientRpc] void RpcPlayerBoostParticles() => boostFireParticleSys.Play();
 
     [Command(requiresAuthority = false)] void CmdPlayerBoostSoundOtherPlayers() => RpcPlayerBoostSound();
-    [ClientRpc] void RpcPlayerBoostSound(){if (!isLocalPlayer) SoundManager.PlaySound(PlayerBoostSoundClip, 0.25f, 0.5f);}
+    [ClientRpc] void RpcPlayerBoostSound(){if (!isLocalPlayer) SoundManager.PlaySound(PlayerBoostSoundClip, 0.25f, 0.4f, true);}
 
 
     IEnumerator VelocityBoostTimer()
@@ -129,7 +135,7 @@ public class Player : NetworkBehaviour
 
 
     [Command(requiresAuthority = false)] // function following this line is run only on server, and will therefore only affect server object (which has a rigidbody for physics sim)
-    void CmdApplyForceOnServer(Vector3 directionalForce, float rotationalForce, bool rotationalBoostActive, bool velocityBoostActive)
+    void CmdApplyInputOnServer(Vector3 directionalForce, float rotationalForce, bool rotationalBoostActive, bool velocityBoostActive, bool activateAbility)
     {
         if (Vector3.Dot(rb.velocity, directionalForce.normalized) < (GameManager.Instance.playerSpeedLimit * (velocityBoostActive? GameManager.Instance.speedLimitBoostMultiplier : 1f) ))
             rb.AddForce(directionalForce * (velocityBoostActive ? GameManager.Instance.VelocityBoostMultiplier : 1f));
@@ -140,16 +146,33 @@ public class Player : NetworkBehaviour
                 (rotationalForce < 0 && rb.angularVelocity.z > -1 * (velocityBoostActive ? GameManager.Instance.angularSpeedLimitBoost : GameManager.Instance.angularSpeedLimitNormal))
             )
             rb.AddTorque(transform.forward * rotationalForce * (velocityBoostActive ? GameManager.Instance.RotationalBoostMultiplier : 1f));
-        /* old code provided a fixed rotational boost, new code just boosts whatever you're doing, rotation or velocity
-        if (
-                (rotationalBoostForce > 0 && rb.angularVelocity.z < angularSpeedLimitBoost)
-                ||
-                (rotationalBoostForce < 0 && rb.angularVelocity.z > -1 * angularSpeedLimitBoost)
-            )
-            rb.AddTorque(transform.forward * rotationalBoostForce);
-        */
+
+
+        if (activateAbility)
+        {
+            playerAbility = GetComponentInChildren<PlayerAbility>();
+            if (playerAbility != null && !playerAbility.activatingPlayerAbility)
+            {
+                if (playerAbility.ActivatePlayerAbility())
+                    RemovePlayerAbilityClientAndServer();
+            }
+        }
     }
 
+    void RemovePlayerAbilityClientAndServer()
+    {
+        RemovePlayerAbility();
+        RpcRemovePlayerAbility();
+    }
 
+    [ClientRpc] void RpcRemovePlayerAbility() => RemovePlayerAbility();
+
+    void RemovePlayerAbility()
+    {
+        if (GetComponentInChildren<PlayerAbility>() != null)
+        {
+            Destroy(GetComponentInChildren<PlayerAbility>().gameObject);
+        }
+    }
     
 }

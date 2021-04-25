@@ -15,9 +15,10 @@ GameObject:
   - component: {fileID: 1497221164272198892}
   - component: {fileID: 1497221164272198894}
   - component: {fileID: 1497221164272198871}
+  - component: {fileID: 8677540801814503664}
   m_Layer: 0
   m_Name: Coin
-  m_TagString: Untagged
+  m_TagString: Coin
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -145,3 +146,21 @@ MonoBehaviour:
   syncInterval: 0.1
   collectedSound: {fileID: 8300000, guid: 79180f511d89441b9aa23ccae1992fe0, type: 3}
   explosionPrefab: {fileID: 1804206099813350, guid: 4dd02b5f854b6c84990fbeb810abffe4, type: 3}
+  spanwNewCoinWhenCollected: 1
+--- !u!114 &8677540801814503664
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1497221164272198895}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6090da511f8374135a15dd8655adcd44, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _recordingInterval: 0.01666
+  _mode: 1
+  _globalClockKey: MusicAndCoins
+  _rewindable: 1
+  _recordingDuration: 3

@@ -2,11 +2,16 @@ using Mirror;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Audio;
 
 public class SoundManager : NetworkBehaviour
 {
+    public AudioMixerGroup musicMixerGroup;
     public GameObject SoundPrefab;
-    public AudioSource RoundMusicAudiosource;
+    public AudioSource RoundMusicAudioSource;
+    public AudioSource LevelMusicAudioSource;
+    public float randomizePitchLowMult = 0.9f;
+    public float randomizePitchHighMult = 1.1f;
 
     private static SoundManager _instance;
     /*
@@ -27,19 +32,63 @@ public class SoundManager : NetworkBehaviour
     {
         _instance = this;
     }
-    public static void PlaySound(AudioClip audioClip, float volume, float pitch)
+    public static void PlaySound(AudioClip audioClip, float volume, float pitch, bool randomizePitch)
     {
-        _instance.ClientRpcPlaySoundPrivate(audioClip, volume, pitch);
+        _instance.ClientRpcPlaySoundPrivate(audioClip, volume, pitch, randomizePitch);
     }
     public static void PlaySound(AudioClip audioClip)
     {
-        PlaySound(audioClip, 1, 1);
+        PlaySound(audioClip, 1, 1, false);
     }
 
-    void ClientRpcPlaySoundPrivate(AudioClip audioClip, float volume, float pitch)
+    void ClientRpcPlaySoundPrivate(AudioClip audioClip, float volume, float pitch, bool randomizePitch)
     {
+        if (randomizePitch)
+            pitch = pitch * Random.Range(randomizePitchLowMult, randomizePitchHighMult);
         GameObject newSound = GameObject.Instantiate(SoundPrefab, Vector3.zero, Quaternion.identity);
         newSound.GetComponent<PlaySoundThenDestroySelf>().PlayThenDestroy(audioClip, volume, pitch);
+    }
+
+
+    public static void PlayLevelMusic()
+    {
+        _instance.PlayLevelMusicInt();
+        _instance.RpcPlayLevelMusic(); //start on clients
+    }
+
+    [ClientRpc]
+    void RpcPlayLevelMusic()
+    {
+        PlayLevelMusicInt();
+    }
+    void PlayLevelMusicInt()
+    {
+        LevelMusicAudioSource.time = 0;
+        LevelMusicAudioSource.Play();
+    }
+    public static void StopLevelMusic()
+    {
+        _instance.FadeOutAudioSource(_instance.LevelMusicAudioSource);
+        _instance.RpcStopLevelMusic(); //fade out on clients
+    }
+
+    [ClientRpc]
+    void RpcStopLevelMusic()
+    {
+        StartCoroutine(FadeOutAudioSource(LevelMusicAudioSource));
+    }
+
+
+
+
+    public void ToggleMusic()
+    {
+        musicMixerGroup.audioMixer.GetFloat("MusicVolume", out float audioMixerLevel);
+        Debug.Log("music level: " + audioMixerLevel);
+        if (audioMixerLevel != 0)
+            musicMixerGroup.audioMixer.ClearFloat("MusicVolume");
+        else
+            musicMixerGroup.audioMixer.SetFloat("MusicVolume", -80);
     }
 
     public static void PlayRoundMusic()
@@ -54,30 +103,31 @@ public class SoundManager : NetworkBehaviour
     }
     void PlayRoundMusicInt()
     {
-        RoundMusicAudiosource.volume = 0.5f;
-        RoundMusicAudiosource.Play();
+        RoundMusicAudioSource.time = 0;
+        RoundMusicAudioSource.Play();
     }
 
     public static void StopRoundMusic()
     {
         _instance.RpcStopRoundMusic(); //stop on clients
-        _instance.StartCoroutine(_instance.FadeOutRoundMusic()); //stop on server
+        _instance.StartCoroutine(_instance.FadeOutAudioSource(_instance.RoundMusicAudioSource)); //stop on server
     }
     [ClientRpc]
     void RpcStopRoundMusic()
     {
-        StartCoroutine(_instance.FadeOutRoundMusic());
+        StartCoroutine(_instance.FadeOutAudioSource(_instance.RoundMusicAudioSource));
     }
 
-    IEnumerator FadeOutRoundMusic()
+    IEnumerator FadeOutAudioSource(AudioSource audioSource)
     {
-
+        float currentVolume = audioSource.volume;
         for (int i = 0; i < 10; i++)
         {
-            RoundMusicAudiosource.volume -= 0.05f;
+            audioSource.volume -= 0.05f;
             yield return new WaitForSeconds(0.1f);
         }
-        RoundMusicAudiosource.Stop();
+        audioSource.Stop();
+        audioSource.volume = currentVolume;
     }
 
 
