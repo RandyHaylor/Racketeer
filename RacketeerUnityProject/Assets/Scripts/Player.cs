@@ -7,6 +7,10 @@ using UnityEngine.Audio;
 
 public class Player : NetworkBehaviour
 {
+    private Camera mainCam;
+    public bool attachedView;
+    private Vector3 strafe;
+    private Vector3 moveForward;
     public ParticleSystem boostFireParticleSys;
     public AudioClip PlayerBoostSoundClip;
 
@@ -40,6 +44,7 @@ public class Player : NetworkBehaviour
     {
         rb = this.gameObject.GetComponent<Rigidbody>();
         movement.z = 0f;
+        mainCam = Camera.main;
     }
     void Update()
     {
@@ -101,9 +106,21 @@ public class Player : NetworkBehaviour
                 
             }
 
+            if (attachedView)
+            {
+                moveForward = movement.y * transform.up;
+                strafe = movement.x * transform.right;
+                rotate = rotate / 4;
+            }
+            else
+            {
+                strafe = movement.y * Vector3.up;
+                moveForward = movement.x*Vector3.right;
+            }
+                
             abilityButtonDown = (Input.GetAxis("LeftTriggerAxis") > 0.1f);
 
-            CmdApplyInputOnServer(movement, rotate, rotateBoostActive, velocityBoostActive, abilityButtonDown);
+            CmdApplyInputOnServer(strafe+moveForward, rotate, rotateBoostActive, velocityBoostActive, abilityButtonDown);
             
         }
     }
@@ -138,14 +155,14 @@ public class Player : NetworkBehaviour
     void CmdApplyInputOnServer(Vector3 directionalForce, float rotationalForce, bool rotationalBoostActive, bool velocityBoostActive, bool activateAbility)
     {
         if (Vector3.Dot(rb.velocity, directionalForce.normalized) < (GameManager.Instance.playerSpeedLimit * (velocityBoostActive? GameManager.Instance.speedLimitBoostMultiplier : 1f) ))
-            rb.AddForce(directionalForce * (velocityBoostActive ? GameManager.Instance.VelocityBoostMultiplier : 1f));
+            rb.AddForce(directionalForce * (velocityBoostActive ? GameManager.Instance.velocityBoostMultiplier : 1f));
         
         if (
                 (rotationalForce > 0  && rb.angularVelocity.z < (velocityBoostActive ? GameManager.Instance.angularSpeedLimitBoost : GameManager.Instance.angularSpeedLimitNormal) )
                 ||
                 (rotationalForce < 0 && rb.angularVelocity.z > -1 * (velocityBoostActive ? GameManager.Instance.angularSpeedLimitBoost : GameManager.Instance.angularSpeedLimitNormal))
             )
-            rb.AddTorque(transform.forward * rotationalForce * (velocityBoostActive ? GameManager.Instance.RotationalBoostMultiplier : 1f));
+            rb.AddTorque(transform.forward * rotationalForce * (velocityBoostActive ? GameManager.Instance.rotationalBoostMultiplier : 1f));
 
 
         if (activateAbility)

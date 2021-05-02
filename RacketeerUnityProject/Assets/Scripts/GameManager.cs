@@ -5,18 +5,19 @@ using Mirror;
 using TMPro;
 using UnityEngine.UI;
 using UnityEngine.Audio;
+using UnityEngine.Serialization;
 
 public class GameManager : NetworkBehaviour
 {
     //server-located player movement variables for central & live adjustment or future loading from ini file
-    public float VelocityBoostMultiplier;
-    public float RotationalBoostMultiplier;
+    public float velocityBoostMultiplier;
+    public float rotationalBoostMultiplier;
     public float playerSpeedLimit = 5f;
     public float speedLimitBoostMultiplier;
     public float angularSpeedLimitBoost = 10f;
     public float angularSpeedLimitNormal = 4f;
 
-    public AudioClip InitialCountdownSound; 
+    public AudioClip initialCountdownSound; 
     public float wallTurningRate;
     private Quaternion _previousRotation = Quaternion.identity;
     private Quaternion _targetRotation = Quaternion.identity;
@@ -39,7 +40,7 @@ public class GameManager : NetworkBehaviour
 
     public TMP_Text PlayerScoreOutput;
 
-    public GameObject CenterCountdownTextGameObject;
+    public GameObject centerCountdownTextGameObject;
     public TMP_Text CenterCountdownText;
 
 
@@ -64,7 +65,7 @@ public class GameManager : NetworkBehaviour
         get
         {
             if (_instance == null)
-                Debug.Log("GameMangager instance is null, GameManager object/component is probably missing from the scene...");
+                Debug.Log("GameManager instance is null, GameManager object/component is probably missing from the scene...");
 
             return _instance;
         }
@@ -174,11 +175,11 @@ public class GameManager : NetworkBehaviour
         SetRoundTimeTextToDefault();
         RoundStartBtn.onClick.RemoveAllListeners();
         RoundStartBtn.onClick.AddListener(StartNewRound);
-        CenterCountdownTextGameObject.SetActive(false);
+        centerCountdownTextGameObject.SetActive(false);
     }
 
     // Update is called once per frame
-    void Update()
+    private void Update()
     {
         /*  Caused issues going full screen - basically broke game...
         if (Input.GetKeyDown(KeyCode.Escape) && !Application.isEditor)
@@ -216,7 +217,7 @@ public class GameManager : NetworkBehaviour
     }
 
 
-    void SetBlendedEulerAngles(Vector3 angles)
+    private void SetBlendedEulerAngles(Vector3 angles)
     {
         RpcSetBlendedEulerAngles(angles);
         turnStartTime = Time.time;
@@ -225,7 +226,7 @@ public class GameManager : NetworkBehaviour
 
     }
     [ClientRpc]
-    void RpcSetBlendedEulerAngles(Vector3 angles)
+    private void RpcSetBlendedEulerAngles(Vector3 angles)
     {
         turnStartTime = Time.time;
         _previousRotation = wallsTransform.localRotation;
@@ -239,7 +240,7 @@ public class GameManager : NetworkBehaviour
     }
 
     [Command(requiresAuthority = false)]
-    void CmdStartLevel()
+    private void CmdStartLevel()
     {
         if (levelActive || roundActive)
             return;
@@ -261,7 +262,7 @@ public class GameManager : NetworkBehaviour
     {
         _instance.EndLevelInt();
     }
-    void EndLevelInt()
+    private void EndLevelInt()
     {
         SoundManager.StopLevelMusic();
         levelActive = false;
@@ -271,7 +272,7 @@ public class GameManager : NetworkBehaviour
         MoveSphereToCenter();
         ResetCamera();
     }
-    void ResetCamera()
+    private void ResetCamera()
     {
         Camera.main.GetComponent<SmoothCamera2D>().target = null;
         RpcResetCamera();
@@ -295,7 +296,7 @@ public class GameManager : NetworkBehaviour
         }
     }
 
-    void MovePlayersToSpawnPoints()
+    private void MovePlayersToSpawnPoints()
     {
         var players = GameObject.FindGameObjectsWithTag("Player");
         var respawns = GameObject.FindGameObjectsWithTag("Respawn");
@@ -308,7 +309,7 @@ public class GameManager : NetworkBehaviour
     }
 
     [ClientRpc]
-    void CameraFollowsPlayer(bool state)
+    private void CameraFollowsPlayer(bool state)
     {
         var players = GameObject.FindGameObjectsWithTag("Player");
         foreach (var player in players)
@@ -324,7 +325,7 @@ public class GameManager : NetworkBehaviour
         CmdStartNewRound(defaultRoundTime);
     }
 
-    void SetRoundTimeTextToDefault()
+    private void SetRoundTimeTextToDefault()
     {
         Debug.Log("setting round time text to default: " + defaultRoundTime + " old value was: " + RoundTimeTextField.text);
         if (isClient)
@@ -333,14 +334,14 @@ public class GameManager : NetworkBehaviour
             RpcSetRoundTimeTextToDefault();
     }
 
-    [Command(requiresAuthority = false)] void CmdSetRoundTimeTextToDefault() => RoundTimeTextField.text = defaultRoundTime.ToString();
-    [ClientRpc] void RpcSetRoundTimeTextToDefault() => RoundTimeTextField.text = defaultRoundTime.ToString();
+    [Command(requiresAuthority = false)] private void CmdSetRoundTimeTextToDefault() => RoundTimeTextField.text = defaultRoundTime.ToString();
+    [ClientRpc] private void RpcSetRoundTimeTextToDefault() => RoundTimeTextField.text = defaultRoundTime.ToString();
 
 
     [Command(requiresAuthority = false)]
-    void CmdStartNewRound(int roundTimeFromClient)
+    private void CmdStartNewRound(int roundTimeFromClient)
     {
-        Debug.Log("Called CmdStartnewRound(" + roundTimeFromClient + ")");
+        Debug.Log("Called CmdStartNewRound(" + roundTimeFromClient + ")");
 
         if (roundActive || levelActive)
         {
@@ -361,23 +362,23 @@ public class GameManager : NetworkBehaviour
         StartCoroutine(RoundHandler(roundTimeFromClient));
     }
     [ClientRpc]
-    void RpcSetupButtonForAbortRound()
+    private void RpcSetupButtonForAbortRound()
     {        
         RoundStartBtn.onClick.RemoveAllListeners();
         RoundStartBtn.onClick.AddListener(ClientEndRound);
     }
 
-    [ClientRpc] void RpcUpdateRoundStartBtnText(string newText) => RoundStartBtn.GetComponentInChildren<TMP_Text>().text = newText;
-    [ClientRpc] void RpcUpdateRoundTimeText(string newText) => RoundTimeTextField.text = newText;
-    [ClientRpc] void RpcUpdateCountdownText(string newText) => CenterCountdownText.text = newText;
-    [ClientRpc] void RpcEnableCenterCountdownTimer(bool enableBool) => CenterCountdownTextGameObject.SetActive(enableBool);
+    [ClientRpc] private void RpcUpdateRoundStartBtnText(string newText) => RoundStartBtn.GetComponentInChildren<TMP_Text>().text = newText;
+    [ClientRpc] private void RpcUpdateRoundTimeText(string newText) => RoundTimeTextField.text = newText;
+    [ClientRpc] private void RpcUpdateCountdownText(string newText) => CenterCountdownText.text = newText;
+    [ClientRpc] private void RpcEnableCenterCountdownTimer(bool enableBool) => centerCountdownTextGameObject.SetActive(enableBool);
 
-    IEnumerator RoundHandler(int newRoundTime) //only called from server CmdStartNewRound
+    private IEnumerator RoundHandler(int newRoundTime) //only called from server CmdStartNewRound
     {
         Debug.Log("Called RoundHandler(" + newRoundTime + ")");
         int currentRoundTime = newRoundTime;
         int currentCountdownTime = defaultCountdownTime;
-        CenterCountdownTextGameObject.SetActive(true);
+        centerCountdownTextGameObject.SetActive(true);
         RpcEnableCenterCountdownTimer(true);
         for (int i = currentCountdownTime; i >= 0; i--)
         {
@@ -388,7 +389,7 @@ public class GameManager : NetworkBehaviour
             Debug.Log("waited 1 second in countdown...");
         }
         //disable center countdown timer on server and clients
-        CenterCountdownTextGameObject.SetActive(false); 
+        centerCountdownTextGameObject.SetActive(false); 
         RpcEnableCenterCountdownTimer(false);
 
        //start round music on server and clients
@@ -412,17 +413,17 @@ public class GameManager : NetworkBehaviour
     }
     private void PlayCountdownSound()
     {
-        // SoundManager.PlaySound(InitialCountdownSound);
+        // SoundManager.PlaySound(initialCountdownSound);
         CmdPlayCountdownSound();
     }
     [ClientRpc]
     private void CmdPlayCountdownSound()
     {
-        SoundManager.PlaySound(InitialCountdownSound);
+        SoundManager.PlaySound(initialCountdownSound);
     }
 
     [Server] 
-    void ResetPlayerScores()
+    private void ResetPlayerScores()
     {
         Debug.Log("Called [Server] ResetPlayerScores()");
         for (int i = 0; i < playerScores.Count; i++)
@@ -433,7 +434,7 @@ public class GameManager : NetworkBehaviour
     }
 
     [Command(requiresAuthority = false)]
-    void CmdEndRound()
+    private void CmdEndRound()
     {
         Debug.Log("Called [Server] EndRound()");
         if (!roundActive)
@@ -453,13 +454,13 @@ public class GameManager : NetworkBehaviour
     }
 
     [Client]
-    void ClientEndRound()
+    private void ClientEndRound()
     {
         CmdEndRound();
     }
 
     [ClientRpc]
-    void RpcEndRound()
+    private void RpcEndRound()
     {
         RoundStartBtn.GetComponentInChildren<TMP_Text>().text = "Start Round";
         RoundStartBtn.onClick.RemoveAllListeners();
@@ -486,7 +487,7 @@ public class GameManager : NetworkBehaviour
 
     }
     [Server]
-    void UpdatePlayerScores()
+    private void UpdatePlayerScores()
     {
         string playerScoreString = "";
         for (int i = 0; i < NetworkManager.singleton.maxConnections; i++)
@@ -500,13 +501,14 @@ public class GameManager : NetworkBehaviour
         UpdateClientScoreText(playerScoreString);
     }
     [ClientRpc]
-    void UpdateClientScoreText(string playerScoreString)
+    private void UpdateClientScoreText(string playerScoreString)
     {
         PlayerScoreOutput.text = playerScoreString;
     }
 
 
-
+        //if I switch to key frame updates vs a flow of updates, I might get away with multiple balls, but it might break sync
+        //If players each have their own ball and are trapped in their own area on a level, I could switch it to local physics
     /* spawning multiple spheres wasn't a great idea, but fun to play with. Commenting out code for now
 public GameObject spherePrefab;
 float sphereSpawnCooldown = 1f;
