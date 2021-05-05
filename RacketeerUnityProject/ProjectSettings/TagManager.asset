@@ -10,6 +10,7 @@ TagManager:
   - RoundCoinSpawn
   - LevelCoinSpawn
   - PlayerAbility
+  - Wall
   layers:
   - Default
   - TransparentFX

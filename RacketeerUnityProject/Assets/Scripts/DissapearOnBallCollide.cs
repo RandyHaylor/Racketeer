@@ -5,10 +5,12 @@ using UnityEngine;
 
 public class DissapearOnBallCollide : NetworkBehaviour
 {
-    public AudioClip collectedSound;
+    public string collectedSound;
+    [Range(0,1)]
+    public float collectedSoundVolume = 0.7f;
     bool beingDestroyed = false;
-    public GameObject explosionPrefab;
-    public bool spanwNewCoinWhenCollected = true;
+    public bool spanwNewItemCollected = true;
+    public string prefabNameToSpawn;
 
 
     private void OnTriggerEnter(Collider other)
@@ -18,8 +20,8 @@ public class DissapearOnBallCollide : NetworkBehaviour
         {
             //Debug.Log("Coin being removed");
             beingDestroyed = true;
-            CmdPlaySound();
-            if (spanwNewCoinWhenCollected) CoinSpawner.SpawnNewCoin();
+            SoundManager.PlaySound(collectedSound, collectedSoundVolume, 1, false);
+            if (spanwNewItemCollected) PrefabSpawner.SpawnNewObject(prefabNameToSpawn, new Vector3(Random.Range(-8f, 8f), Random.Range(-4f, 4f), 0f), Quaternion.identity*Quaternion.Euler(90, 0, 0));
             StartCoroutine(DestroyAfterTime(0.05f, GameManager.Instance.playerNumberOwningBall));
             GameManager.AddPointForOwningPlayer();
         }
@@ -39,10 +41,6 @@ public class DissapearOnBallCollide : NetworkBehaviour
         GameObject.Instantiate(GameManager.Instance.playerExplosions[playerNumber], gameObject.transform.position, Quaternion.identity);
     }
 
-    [ClientRpc]
-    private void CmdPlaySound()
-    {
-        SoundManager.PlaySound(collectedSound);
-    }
+
 
 }

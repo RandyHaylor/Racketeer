@@ -7,6 +7,11 @@ public class ChangeColorOnPlayerHit : NetworkBehaviour
 {
     Vector3 colorCache; //for sending color info between server & client
     Color tempColor; // to avoid creating a new color object every time the color changes
+    int newPlayerNumber;
+    public string newPlayerGainedBallSoundName = "GainedBallSound";
+    [Range(0, 1)]
+    public float gainedBallSoundVolume = 0.7f;
+    string _TintColor = "_TintColor";
 
     private void OnCollisionEnter(Collision collision)
     {
@@ -14,13 +19,16 @@ public class ChangeColorOnPlayerHit : NetworkBehaviour
         {
             if (isServer)
             {
-                GameManager.Instance.playerNumberOwningBall = collision.gameObject.GetComponent<NetworkIdentity>().playerNumber;
+                newPlayerNumber = collision.gameObject.GetComponent<NetworkIdentity>().playerNumber;
+                if (GameManager.Instance.playerNumberOwningBall != newPlayerNumber)
+                    SoundManager.PlaySound(newPlayerGainedBallSoundName, gainedBallSoundVolume, 1, false);
+                GameManager.Instance.playerNumberOwningBall = newPlayerNumber;
 
-                colorCache.x = collision.gameObject.GetComponent<MeshRenderer>().material.color.r;
-                colorCache.y = collision.gameObject.GetComponent<MeshRenderer>().material.color.g;
-                colorCache.z = collision.gameObject.GetComponent<MeshRenderer>().material.color.b;
+                colorCache.x = GameManager.Instance.playerColors[GameManager.Instance.playerNumberOwningBall].r;//collision.gameObject.GetComponent<MeshRenderer>().material.color.r;
+                colorCache.y = GameManager.Instance.playerColors[GameManager.Instance.playerNumberOwningBall].b;
+                colorCache.z = GameManager.Instance.playerColors[GameManager.Instance.playerNumberOwningBall].g;
 
-                gameObject.GetComponent<MeshRenderer>().material.color = tempColor;
+                gameObject.GetComponent<MeshRenderer>().material.SetColor(_TintColor, GameManager.Instance.playerColors[GameManager.Instance.playerNumberOwningBall]);
 
                 RpcUpdateSphereColor(colorCache);
             }

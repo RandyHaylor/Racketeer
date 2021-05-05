@@ -1,0 +1,125 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!21 &2100000
+Material:
+  serializedVersion: 6
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_Name: Fire_Cylinder
+  m_Shader: {fileID: 4800000, guid: 62aaf64982175de48bab68921821a9e6, type: 3}
+  m_ShaderKeywords: _EMISSION
+  m_LightmapFlags: 1
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: 3000
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _BumpMap:
+        m_Texture: {fileID: 2800000, guid: 7c7aa51026deb0345ab5154e1c025861, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _BumpMap2:
+        m_Texture: {fileID: 2800000, guid: bad7be3b9faebff4d9bbaa27fa82d09c, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _DisTex:
+        m_Texture: {fileID: 2800000, guid: d7c2c0b968ff3c6429ac3ad7182e7aba, type: 3}
+        m_Scale: {x: 10, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _DslTex:
+        m_Texture: {fileID: 2800000, guid: 1eecf0819f6eeab47868e2a956f294bd, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _MainTex:
+        m_Texture: {fileID: 2800000, guid: 8a48c44c70df3534c908db49c4e5888b, type: 3}
+        m_Scale: {x: 10, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _MainTex2:
+        m_Texture: {fileID: 2800000, guid: 1b2365c4d674e2b499e7ac906a20fda4, type: 3}
+        m_Scale: {x: 10, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _MainTex3:
+        m_Texture: {fileID: 2800000, guid: e37b0088d0e59c44a8087db0ed428f05, type: 3}
+        m_Scale: {x: 1, y: 0.8}
+        m_Offset: {x: 0, y: 1.1}
+    - _aDslTex:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Floats:
+    - _Alpha1: 0
+    - _Alpha2: 0
+    - _Alpha3: 0
+    - _BiasDs: 0.33
+    - _BiasDsl: 1
+    - _BiasMT: 1
+    - _BiasMT2: 1.5
+    - _BiasMT3: 0.28
+    - _Bri: 0
+    - _BumpAmt: 3
+    - _Con: 1
+    - _DisTexType: 0
+    - _DslEA: 0
+    - _DslEI: 1
+    - _DslER: 0.017
+    - _DslGl: 0.38
+    - _DstBlend: 1
+    - _InterAlpha: 1
+    - _InterEdge: 1.7
+    - _InterPow: 13.6
+    - _InvFade: 5
+    - _Mode: 0
+    - _Queue: 3000
+    - _SrcBlend: 5
+    - _aDslGl: 0
+    - _ac: 3
+    - _dT: 1
+    - _dTA: 1
+    - _dTAE: 1
+    - _dslT: 1
+    - _dslTA: 0
+    - _dslTAE: 0
+    - _fT: 1
+    - _fTA: 1
+    - _fTAE: 1
+    - _interT: 1
+    - _inv1: 0
+    - _inv2: 0
+    - _inv3: 0
+    - _invAlpha1: 0
+    - _invAlpha2: 0
+    - _invAlpha3: 0
+    - _numberTex: 2
+    - _rgbc: 3
+    - _sT: 0
+    - _sTA: 1
+    - _sTAE: 1
+    - _tT: 0
+    - _tTA: 1
+    - _tTAE: 1
+    m_Colors:
+    - _DslEC: {r: 0.9034481, g: 1, b: 0, a: 1}
+    - _InterColor: {r: 1, g: 1, b: 1, a: 0.8784314}
+    - _Pan1: {r: 0.17, g: -0.29, b: 0, a: 0}
+    - _Pan2: {r: -0.2, g: 0.1, b: 0, a: 0}
+    - _Pan3: {r: 0, g: 0, b: 0, a: 0}
+    - _PanDs: {r: 0.8, g: -0.8, b: 0, a: 0}
+    - _PanDsl: {r: 0, g: 0, b: 0, a: 0}
+    - _Rot1: {r: 0.5, g: 0.5, b: 0, a: 0}
+    - _Rot2: {r: 0.5, g: 0.5, b: 0, a: 0}
+    - _Rot3: {r: 0.5, g: 0.5, b: 0, a: 0}
+    - _RotDs: {r: 0.5, g: 0.5, b: 0, a: 0}
+    - _RotDsl: {r: 0.5, g: 0.5, b: 0, a: 0}
+    - _Tile1: {r: 1, g: 1, b: 0, a: 0}
+    - _Tile2: {r: 1, g: 1, b: 0, a: 0}
+    - _Tile3: {r: 1, g: 1, b: 0, a: 0}
+    - _TileDs: {r: 1, g: 1, b: 0, a: 0}
+    - _TileDsl: {r: 1, g: 1, b: 0, a: 0}
+    - _TintColor: {r: 1, g: 0.3103449, b: 0, a: 0.38431373}
+    - _aPanDsl: {r: 0, g: 0, b: 0, a: 0}
+    - _aRotDsl: {r: 0.5, g: 0.5, b: 0, a: 0}
+    - _aTileDsl: {r: 1, g: 1, b: 0, a: 0}

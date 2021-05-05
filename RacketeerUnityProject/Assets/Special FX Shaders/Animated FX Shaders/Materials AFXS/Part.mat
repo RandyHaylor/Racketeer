@@ -1,0 +1,92 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!21 &2100000
+Material:
+  serializedVersion: 6
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_Name: Part
+  m_Shader: {fileID: 4800000, guid: ba204f34246245a489526486b90990fb, type: 3}
+  m_ShaderKeywords: 
+  m_LightmapFlags: 5
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: 3000
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _Emi1:
+        m_Texture: {fileID: 2800000, guid: f0f24b6f678e62a4592ef0818adc4a6d, type: 3}
+        m_Scale: {x: 1, y: 2}
+        m_Offset: {x: 0, y: -1}
+    - _Emi2:
+        m_Texture: {fileID: 2800000, guid: 231c3fc889ef4cb498cd13a4c1d8b979, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _MainTex:
+        m_Texture: {fileID: 2800000, guid: f0f24b6f678e62a4592ef0818adc4a6d, type: 3}
+        m_Scale: {x: 1, y: 2}
+        m_Offset: {x: 0, y: -1}
+    - _MainTex2:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _MainTex3:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Prlx:
+        m_Texture: {fileID: 2800000, guid: 231c3fc889ef4cb498cd13a4c1d8b979, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Floats:
+    - _Alpha1: 0
+    - _Alpha2: 0
+    - _Alpha3: 0
+    - _Bias: 0
+    - _Bri: 0
+    - _Con: 1
+    - _DstBlend: 10
+    - _InvFade: 5
+    - _Mode: 7
+    - _Queue: 3000
+    - _SrcBlend: 1
+    - _ac: 0
+    - _bright: 1
+    - _fT: 1
+    - _fTA: 1
+    - _fTAE: 1
+    - _inv1: 0
+    - _inv2: 0
+    - _inv3: 0
+    - _invAlpha1: 0
+    - _invAlpha2: 0
+    - _invAlpha3: 0
+    - _numberTex: 0
+    - _prl1: 0
+    - _prl2: 0
+    - _rgbc: 0
+    - _sT: 1
+    - _sTA: 0
+    - _sTAE: 0
+    - _tT: 1
+    - _tTA: 0
+    - _tTAE: 0
+    m_Colors:
+    - _Color: {r: 1, g: 1, b: 1, a: 1}
+    - _MainColor: {r: 1, g: 0.49019608, b: 0, a: 1}
+    - _Pan1: {r: 0, g: 0.1, b: 0, a: 0}
+    - _Pan2: {r: 0, g: 0, b: 0, a: 0}
+    - _Pan3: {r: 0, g: 0, b: 0, a: 0}
+    - _PanPrlx: {r: 0, g: 0, b: 0, a: 0}
+    - _Rot1: {r: 0.5, g: 0.5, b: 0, a: 0}
+    - _Rot2: {r: 0.5, g: 0.5, b: 0, a: 0}
+    - _Rot3: {r: 0.5, g: 0.5, b: 0, a: 0}
+    - _RotPrlx: {r: 0.5, g: 0.5, b: 0, a: 0}
+    - _Tile1: {r: 1, g: 1, b: 0, a: 0}
+    - _Tile2: {r: 1, g: 1, b: 0, a: 0}
+    - _Tile3: {r: 1, g: 1, b: 0, a: 0}
+    - _TintColor: {r: 1, g: 0.49019608, b: 0, a: 0.49803922}

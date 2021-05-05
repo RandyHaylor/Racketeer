@@ -5,6 +5,11 @@ using Mirror;
 
 public abstract class PlayerAbility : MonoBehaviour
 {
+    public string abilitySoundName;
+    [Range(0, 1)]
+    public float abilitySoundVolume = 1;
+
+    [HideInInspector]
     public bool activatingPlayerAbility { get; set; }
 
     private void Awake()

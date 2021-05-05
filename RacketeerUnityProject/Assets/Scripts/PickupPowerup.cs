@@ -8,8 +8,12 @@ public class PickupPowerup : NetworkBehaviour
 
 
     public GameObject powerupPrefab;
+    public string pickedUpPowerupSoundName = "PickedUpPowerup";
+    public bool spawnNewPowerupOnPickup;
+    public string prefabNameToSpawn;
+    
     bool grantingPowerup = false; //prevent giving to multiple players by accident or giving multiple times
-
+    
     private void OnTriggerEnter(Collider other)
     {
         Debug.Log("Collision with powerup");
@@ -27,8 +31,11 @@ public class PickupPowerup : NetworkBehaviour
             //create the powerup on non-server client player objects
             RpcCreatePowerupAbilityOnPlayer(other.gameObject.GetComponent<NetworkBehaviour>().netId);
 
+            SoundManager.PlaySound(pickedUpPowerupSoundName);
+
             //remove the powerup item from play
             NetworkServer.Destroy(gameObject);
+            if (spawnNewPowerupOnPickup) PrefabSpawner.SpawnNewObject(prefabNameToSpawn, new Vector3(Random.Range(-8f, 8f), Random.Range(-4f, 4f), 0f), Quaternion.identity);
         }
     }
 

@@ -13,10 +13,15 @@ public class GameManager : NetworkBehaviour
     public float velocityBoostMultiplier;
     public float rotationalBoostMultiplier;
     public float playerSpeedLimit = 5f;
+    public float playerBaseMovementForce = 2;
+    public float playerBaseAngularMovementForce = 2;
     public float speedLimitBoostMultiplier;
     public float angularSpeedLimitBoost = 10f;
     public float angularSpeedLimitNormal = 4f;
 
+    public List<Color> playerColors;
+
+    [SyncVar] public bool syncVar_RewindingActive;
     public AudioClip initialCountdownSound; 
     public float wallTurningRate;
     private Quaternion _previousRotation = Quaternion.identity;
@@ -48,6 +53,7 @@ public class GameManager : NetworkBehaviour
     public TMP_Text RoundTimeTextField;
     public Button RoundStartBtn;
     bool roundActive = false;
+    bool startingNewRound = false;
 
     public Button LevelStartBtn;
     public LevelManager levelManager;
@@ -255,7 +261,7 @@ public class GameManager : NetworkBehaviour
 
         CameraFollowsPlayer(true);
 
-        SoundManager.PlayLevelMusic();
+        SoundManager.ServerPlayMusic("LevelMusic");
     }
 
     public static void EndLevel()
@@ -264,7 +270,7 @@ public class GameManager : NetworkBehaviour
     }
     private void EndLevelInt()
     {
-        SoundManager.StopLevelMusic();
+        SoundManager.StopMusic();
         levelActive = false;
         levelManager.ResetLevel();
         MovePlayersToSpawnPoints();
@@ -291,7 +297,7 @@ public class GameManager : NetworkBehaviour
         foreach (var coinSpawnPoint in roundCoinSpawns)
         {
                 newCoin = GameObject.Instantiate(coinPrefab, coinSpawnPoint.transform.position, coinSpawnPoint.transform.rotation);
-                newCoin.GetComponent<DissapearOnBallCollide>().spanwNewCoinWhenCollected = true;
+                newCoin.GetComponent<DissapearOnBallCollide>().spanwNewItemCollected = true;
                 NetworkServer.Spawn(newCoin);
         }
     }
@@ -322,6 +328,7 @@ public class GameManager : NetworkBehaviour
 
     public void StartNewRound()
     {
+        Debug.Log("Called Start new round");
         CmdStartNewRound(defaultRoundTime);
     }
 
@@ -341,7 +348,15 @@ public class GameManager : NetworkBehaviour
     [Command(requiresAuthority = false)]
     private void CmdStartNewRound(int roundTimeFromClient)
     {
+        if (!isServer) return;
         Debug.Log("Called CmdStartNewRound(" + roundTimeFromClient + ")");
+        if (startingNewRound)
+        {
+            Debug.Log("Round start already in progress, aborting additional attempt to start round");
+            return;
+        }
+
+        startingNewRound = true;
 
         if (roundActive || levelActive)
         {
@@ -382,7 +397,7 @@ public class GameManager : NetworkBehaviour
         RpcEnableCenterCountdownTimer(true);
         for (int i = currentCountdownTime; i >= 0; i--)
         {
-            PlayCountdownSound();
+            SoundManager.PlaySound("CountdownSound", 0.6f, 1, false);
             CenterCountdownText.text = i.ToString();
             RpcUpdateCountdownText(i.ToString());
             yield return new WaitForSeconds(1);
@@ -392,11 +407,14 @@ public class GameManager : NetworkBehaviour
         centerCountdownTextGameObject.SetActive(false); 
         RpcEnableCenterCountdownTimer(false);
 
-       //start round music on server and clients
-        SoundManager.PlayRoundMusic();
+        //start round music on server and clients
+        Debug.Log("GameManager Calling PlayMusic for round");
+        SoundManager.ServerPlayMusic("RoundMusic");
 
 
         roundActive = true;
+        startingNewRound = false;
+
         ResetPlayerScores();
 
         for (int i = currentRoundTime; i >= 0; i--)
@@ -410,16 +428,6 @@ public class GameManager : NetworkBehaviour
 
         CmdEndRound();
 
-    }
-    private void PlayCountdownSound()
-    {
-        // SoundManager.PlaySound(initialCountdownSound);
-        CmdPlayCountdownSound();
-    }
-    [ClientRpc]
-    private void CmdPlayCountdownSound()
-    {
-        SoundManager.PlaySound(initialCountdownSound);
     }
 
     [Server] 
@@ -443,7 +451,7 @@ public class GameManager : NetworkBehaviour
             return;
         }
 
-        SoundManager.StopRoundMusic();
+        SoundManager.StopMusic();
 
         roundActive = false;
         RoundStartBtn.GetComponentInChildren<TMP_Text>().text = "Start Round";

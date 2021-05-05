@@ -32,7 +32,7 @@ Transform:
   m_GameObject: {fileID: 1497221164272198895}
   m_LocalRotation: {x: 0.7071068, y: 0, z: 0, w: 0.7071068}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1.25, y: 0.05, z: 1.25}
+  m_LocalScale: {x: 1.25, y: 0.02, z: 1.25}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
@@ -64,7 +64,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: c3a2a7767c0fed848b3402e538ab49fc, type: 2}
+  - {fileID: 2100000, guid: 136838aa1a267475aabe1b0e58b2071a, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -144,9 +144,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   syncMode: 0
   syncInterval: 0.1
-  collectedSound: {fileID: 8300000, guid: 79180f511d89441b9aa23ccae1992fe0, type: 3}
-  explosionPrefab: {fileID: 1804206099813350, guid: 4dd02b5f854b6c84990fbeb810abffe4, type: 3}
-  spanwNewCoinWhenCollected: 1
+  collectedSound: CoinCollectSound
+  collectedSoundVolume: 0.5
+  spanwNewItemCollected: 1
+  prefabNameToSpawn: Coin
 --- !u!114 &8677540801814503664
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -13,7 +13,7 @@ public class LevelManager : NetworkBehaviour
     [SerializeField]
     GameObject coinPrefab;
 
-    List<GameObject> coinSpawnPoints;
+    public List<GameObject> coinSpawnPoints;
 
     int coinsCollected = 0;
     int coinCount = 0;
@@ -22,7 +22,7 @@ public class LevelManager : NetworkBehaviour
 
     private void Start()
     {
-        coinSpawnPoints = GameObject.FindGameObjectsWithTag("LevelCoinSpawn").ToList<GameObject>();
+        
     }
 
     public void StartLevel()
@@ -49,7 +49,7 @@ public class LevelManager : NetworkBehaviour
         foreach (var coinSpawnPoint in coinSpawnPoints)
         {
             newCoin = GameObject.Instantiate(coinPrefab, coinSpawnPoint.transform.position, coinPrefab.transform.rotation);
-            newCoin.GetComponent<DissapearOnBallCollide>().spanwNewCoinWhenCollected = false;
+            newCoin.GetComponent<DissapearOnBallCollide>().spanwNewItemCollected = false;
             NetworkServer.Spawn(newCoin);
         }
     }

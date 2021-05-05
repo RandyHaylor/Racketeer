@@ -41,8 +41,8 @@ public class TimeController : NetworkBehaviour
         if (Input.GetKeyDown(KeyCode.Alpha1))
         {
             //clock.localTimeScale = -1; // Rewind
-            StartCoroutine(RewindTimeCoroutine(RewindTimeScale, RewindDuration, "BallAndPlayers"));
-            StartCoroutine(RewindTimeCoroutine(RewindTimeScale, RewindDuration, "MusicAndCoins"));
+            StartCoroutine(RewindTimeCoroutine(RewindTimeScale, RewindDuration, "BallAndPlayers", null));
+            StartCoroutine(RewindTimeCoroutine(RewindTimeScale, RewindDuration, "MusicAndCoins", null));
         }
         
         /*else if (Input.GetKeyDown(KeyCode.Alpha2))
@@ -64,11 +64,11 @@ public class TimeController : NetworkBehaviour
         */
     }
     
-    public void RewindTime()
+    public void RewindTime(GameObject objectToExempt)
     {
         if (!isServer) { Debug.Log("Can only run this from Server... "); return; }
         //rewind physics objects on server
-        RewindTimeInternal("BallAndPlayers");
+        RewindTimeInternal("BallAndPlayers", objectToExempt);
         RewindTimeInternal("MusicAndCoins");
         //rewind music and coins on all clients
         RpcRewindTime("MusicAndCoins");
@@ -76,27 +76,28 @@ public class TimeController : NetworkBehaviour
 
     [ClientRpc] void RpcRewindTime(string clockKeyName) => RewindTimeInternal(clockKeyName);
 
-    void RewindTimeInternal(string clockKey)
+    void RewindTimeInternal(string clockKey) => RewindTimeInternal(clockKey, null);
+    void RewindTimeInternal(string clockKey, GameObject objectToExempt)
     {
-        StartCoroutine(RewindTimeCoroutine(RewindTimeScale, RewindDuration, clockKey));
+        StartCoroutine(RewindTimeCoroutine(RewindTimeScale, RewindDuration, clockKey, objectToExempt));
     }
 
-    IEnumerator RewindTimeCoroutine(float rewindTimeScale, float rewindDuration, string clockKey)
+    IEnumerator RewindTimeCoroutine(float rewindTimeScale, float rewindDuration, string clockKey, GameObject objectToExempt)
     {
         if (rewindingKeys.Contains(clockKey)) yield break;
        
         rewindingKeys.Add(clockKey);
 
+        //disable rewinding on exempted object (originally designed to be calling player)
+        if (objectToExempt) objectToExempt.GetComponent<Timeline>().rewindable = false;
+        
         //lerp to reverse time
         if (smoothTimeShift)
         {
             Timekeeper.instance.Clock(clockKey).LerpTimeScale(rewindTimeScale, timeScaleLerpDurationStart, steadyLerpTimeScaleStart);
             yield return new WaitForSeconds(timeScaleLerpDurationStart);
         }
-            
-
-
-
+        //ensure timescale is set and wait specified time    
         Timekeeper.instance.Clock(clockKey).localTimeScale = rewindTimeScale;
         yield return new WaitForSeconds(rewindDuration);
                 
@@ -109,5 +110,11 @@ public class TimeController : NetworkBehaviour
             
         Timekeeper.instance.Clock(clockKey).localTimeScale = 1;
         rewindingKeys.Remove(clockKey);
+        if (objectToExempt)
+        {
+            yield return new WaitForEndOfFrame();
+            objectToExempt.GetComponent<Timeline>().ResetRecording();
+            objectToExempt.GetComponent<Timeline>().rewindable = true;
+        }
     }
 }

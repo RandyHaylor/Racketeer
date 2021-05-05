@@ -7,12 +7,17 @@ using UnityEngine.Audio;
 
 public class Player : NetworkBehaviour
 {
+
+    [Header("Player Specific Settings")] [Range(0, 1)]
+    public float deadzone = 0.15f;
+    
+    
     private Camera mainCam;
     public bool attachedView;
     private Vector3 strafe;
     private Vector3 moveForward;
     public ParticleSystem boostFireParticleSys;
-    public AudioClip PlayerBoostSoundClip;
+    public string PlayerBoostSoundClip;
 
     float moveHorizontal;
     float horizontalMovementMult = 3000f;
@@ -21,7 +26,7 @@ public class Player : NetworkBehaviour
     float rotateStickHorizontal;
     float rotate;
     float rotateMult = -600f;
-    float triggerAxis;
+    float rightTriggerAxis;
     bool abilityButtonDown;
 
     float rotateBoostDuration = 0.1f;
@@ -46,86 +51,82 @@ public class Player : NetworkBehaviour
         movement.z = 0f;
         mainCam = Camera.main;
     }
+    
+    void FixedUpdate()
+    {
+        if (!isServer) return;
+            //enforce maximum boosted speed limit on players
+        if (rb.velocity.sqrMagnitude > GameManager.Instance.speedLimitBoostMultiplier * GameManager.Instance.playerSpeedLimit * GameManager.Instance.speedLimitBoostMultiplier * GameManager.Instance.playerSpeedLimit)
+            rb.velocity = GameManager.Instance.speedLimitBoostMultiplier * GameManager.Instance.playerSpeedLimit * rb.velocity.normalized;
+        if (rb.angularVelocity.sqrMagnitude > GameManager.Instance.angularSpeedLimitBoost * GameManager.Instance.angularSpeedLimitBoost)
+            rb.angularVelocity = GameManager.Instance.angularSpeedLimitBoost * rb.velocity.normalized;            
+    }
     void Update()
     {
-        HandleMovement();
+        if (isLocalPlayer) HandleInput();
     }
-    void HandleMovement()
+    void HandleInput()
     {
-        if (isLocalPlayer)
+        moveHorizontal = Mathf.Clamp(Input.GetAxis("LeftStickHorizontal") + Input.GetAxis("Horizontal"), -1, 1);
+        moveVertical = Mathf.Clamp(Input.GetAxis("LeftStickVertical") + Input.GetAxis("Vertical"), -1, 1);
+        if (Math.Abs(moveHorizontal) < deadzone) moveHorizontal = 0f;
+        if (Math.Abs(moveVertical) < deadzone) moveVertical = 0f;
+        //movement = new Vector3(moveHorizontal * horizontalMovementMult, moveVertical* verticalMovementMult, 0);
+
+        //  movement and rotate are global objects because they get re-used each frame
+        movement.x = moveHorizontal * horizontalMovementMult * Time.deltaTime;
+        movement.y = moveVertical * verticalMovementMult * Time.deltaTime;
+
+        //right stick slower rotation code   
+        rotateStickHorizontal = Input.GetAxis("RightStickHorizontal"); 
+        if (Math.Abs(rotateStickHorizontal) < deadzone) rotateStickHorizontal = 0f;
+        rotate = rotateMult * rotateStickHorizontal * Time.deltaTime;
+
+        //rotational boost code (triggers)
+        rightTriggerAxis = Input.GetAxis("RightTriggerAxis");
+
+        if (rightTriggerAxis > 0.2f && !rotateBoostCoolingDown && !rotateBoostActive) //Math.Abs(rightTriggerAxis)
         {
-            moveHorizontal = Mathf.Clamp(Input.GetAxis("LeftStickHorizontal") + Input.GetAxis("Horizontal"), -1, 1);
-            moveVertical = Mathf.Clamp(Input.GetAxis("LeftStickVertical") + Input.GetAxis("Vertical"), -1, 1);
-            if (Math.Abs(moveHorizontal) < 0.15f) moveHorizontal = 0f;
-            if (Math.Abs(moveVertical) < 0.15f) moveVertical = 0f;
-            //movement = new Vector3(moveHorizontal * horizontalMovementMult, moveVertical* verticalMovementMult, 0);
-            //below code prevents creating a new Vector3 object every frame that will eventually be cleaned up by garbage collection, which can cause a lag spike
-            //  movement and rotate are global objects for this reason - they get re-used each frame
-            movement.x = moveHorizontal * horizontalMovementMult * Time.deltaTime;
-            movement.y = moveVertical * verticalMovementMult * Time.deltaTime;
-
-            //right stick slower rotation code   
-            rotateStickHorizontal = Input.GetAxis("RightStickHorizontal"); 
-            if (Math.Abs(rotateStickHorizontal) < 0.1f) rotateStickHorizontal = 0f;
-            rotate = rotateMult * rotateStickHorizontal * Time.deltaTime;
-
-            //velocity boost code (bumpers)
-            /*
-            if (Input.GetButton("LeftBumper") || Input.GetButton("RightBumper") || Input.GetButton("Submit")) //will be true for a couple hundred frames...
-                velocityBoostInput = true;
+            if (rightTriggerAxis>0f)
+            {
+                rotateBoostAmount = rotateMult * 2;
+            }
             else
-                velocityBoostInput = false;
+            {
+                rotateBoostAmount = rotateMult * - 2;
+            }
+            rotateBoostActive = true;
+            velocityBoostActive = true;
+            StartCoroutine(VelocityBoostTimer());
+            StartCoroutine(AngularBoostTimer());
             
-
-            if (velocityBoostInput && !velocityBoostCoolingDown && !velocityBoostActive)
-            {
-                velocityBoostActive = true;
-                StartCoroutine(VelocityBoostTimer());
-            }*/
-
-            //rotational boost code (triggers)
-            triggerAxis = Input.GetAxis("RightTriggerAxis");
-
-            if (triggerAxis > 0.1f && !rotateBoostCoolingDown && !rotateBoostActive) //Math.Abs(triggerAxis)
-            {
-                if (triggerAxis>0f)
-                {
-                    rotateBoostAmount = rotateMult * 2;
-                }
-                else
-                {
-                    rotateBoostAmount = rotateMult * - 2;
-                }
-                rotateBoostActive = true;
-                velocityBoostActive = true;
-                StartCoroutine(VelocityBoostTimer());
-                StartCoroutine(AngularBoostTimer());
-                if (isLocalPlayer) SoundManager.PlaySound(PlayerBoostSoundClip, 0.25f, 0.4f, true);
-                CmdPlayerBoostSoundOtherPlayers();
-                CmdPlayerBoostParticles();
-                
-            }
-
-            if (attachedView)
-            {
-                moveForward = movement.y * transform.up;
-                strafe = movement.x * transform.right;
-                rotate = rotate / 4;
-            }
-            else
-            {
-                strafe = movement.y * Vector3.up;
-                moveForward = movement.x*Vector3.right;
-            }
-                
-            abilityButtonDown = (Input.GetAxis("LeftTriggerAxis") > 0.1f);
-
-            CmdApplyInputOnServer(strafe+moveForward, rotate, rotateBoostActive, velocityBoostActive, abilityButtonDown);
+            //play boost sound and particle system on self and other clients
+            SoundManager.PlaySound(PlayerBoostSoundClip, 0.25f, 0.4f, true);
+            
+            boostFireParticleSys.Play();
+            CmdPlayerBoostParticles();
             
         }
+
+        if (attachedView)
+        {
+            moveForward = movement.y * transform.up;
+            strafe = movement.x * transform.right;
+            rotate = rotate / 4;
+        }
+        else
+        {
+            strafe = movement.y * Vector3.up;
+            moveForward = movement.x*Vector3.right;
+        }
+            
+        abilityButtonDown = (Input.GetAxis("LeftTriggerAxis") > 0.1f);
+        
+        //only send movement updates to server if rewinding is not active
+        if (!GameManager.Instance.syncVar_RewindingActive) CmdApplyInputOnServer(strafe+moveForward, rotate, rotateBoostActive, velocityBoostActive, abilityButtonDown);
     }
     [Command(requiresAuthority = false)] void CmdPlayerBoostParticles() => RpcPlayerBoostParticles();
-    [ClientRpc] void RpcPlayerBoostParticles() => boostFireParticleSys.Play();
+    [ClientRpc] void RpcPlayerBoostParticles() { if (!isLocalPlayer) boostFireParticleSys.Play(); }
 
     [Command(requiresAuthority = false)] void CmdPlayerBoostSoundOtherPlayers() => RpcPlayerBoostSound();
     [ClientRpc] void RpcPlayerBoostSound(){if (!isLocalPlayer) SoundManager.PlaySound(PlayerBoostSoundClip, 0.25f, 0.4f, true);}
@@ -152,19 +153,22 @@ public class Player : NetworkBehaviour
 
 
     [Command(requiresAuthority = false)] // function following this line is run only on server, and will therefore only affect server object (which has a rigidbody for physics sim)
-    void CmdApplyInputOnServer(Vector3 directionalForce, float rotationalForce, bool rotationalBoostActive, bool velocityBoostActive, bool activateAbility)
+    void CmdApplyInputOnServer(Vector3 directionalForce, float rotationalForce, bool rotationalBoostActive, bool velocityBoostActiveClient, bool activateAbility)
     {
-        if (Vector3.Dot(rb.velocity, directionalForce.normalized) < (GameManager.Instance.playerSpeedLimit * (velocityBoostActive? GameManager.Instance.speedLimitBoostMultiplier : 1f) ))
-            rb.AddForce(directionalForce * (velocityBoostActive ? GameManager.Instance.velocityBoostMultiplier : 1f));
+        if (GameManager.Instance.syncVar_RewindingActive) return; //discarding all movement input/force application during rewind
+        //if speed in the direction the user is pointing is below the speed limit, apply the movement force
+        if (Vector3.Dot(rb.velocity, directionalForce.normalized) < (GameManager.Instance.playerSpeedLimit * (velocityBoostActiveClient? GameManager.Instance.speedLimitBoostMultiplier : 1f) ))
+            rb.AddForce(directionalForce * GameManager.Instance.playerBaseMovementForce * (velocityBoostActiveClient ? GameManager.Instance.velocityBoostMultiplier : 1f));
         
+        //if the angular speed is below the angular speed limit, apply the angular force
         if (
-                (rotationalForce > 0  && rb.angularVelocity.z < (velocityBoostActive ? GameManager.Instance.angularSpeedLimitBoost : GameManager.Instance.angularSpeedLimitNormal) )
+                (rotationalForce > 0  && rb.angularVelocity.z < (velocityBoostActiveClient ? GameManager.Instance.angularSpeedLimitBoost : GameManager.Instance.angularSpeedLimitNormal) )
                 ||
-                (rotationalForce < 0 && rb.angularVelocity.z > -1 * (velocityBoostActive ? GameManager.Instance.angularSpeedLimitBoost : GameManager.Instance.angularSpeedLimitNormal))
+                (rotationalForce < 0 && rb.angularVelocity.z > -1 * (velocityBoostActiveClient ? GameManager.Instance.angularSpeedLimitBoost : GameManager.Instance.angularSpeedLimitNormal))
             )
-            rb.AddTorque(transform.forward * rotationalForce * (velocityBoostActive ? GameManager.Instance.rotationalBoostMultiplier : 1f));
+            rb.AddTorque(transform.forward * rotationalForce* GameManager.Instance.playerBaseAngularMovementForce * (velocityBoostActiveClient ? GameManager.Instance.rotationalBoostMultiplier : 1f));
 
-
+        //if user is pressing the ability button, look for an inactive ability and use it then remove it
         if (activateAbility)
         {
             playerAbility = GetComponentInChildren<PlayerAbility>();

@@ -9,18 +9,18 @@ public class PlaySoundThenDestroySelf : MonoBehaviour
     {
         audioSource = gameObject.GetComponent<AudioSource>();
     }
-    public void PlayThenDestroy(AudioClip audioClip, float volume, float pitch)
+    public void PlayThenDisable(AudioClip audioClip, float volume, float pitch)
     {
         audioSource.clip = audioClip;
         audioSource.volume = volume;
         audioSource.pitch = pitch;
         audioSource.Play();
-        StartCoroutine(DestroySelf(audioClip.length + 0.5f));
+        StartCoroutine(DisableSelf(audioClip.length + 0.1f));
     }
 
-    IEnumerator DestroySelf(float timeToSelfDestruct)
+    IEnumerator DisableSelf(float timeToDisableSelf)
     {
-        yield return new WaitForSeconds(timeToSelfDestruct);
-        Destroy(gameObject);
+        yield return new WaitForSeconds(timeToDisableSelf);
+        gameObject.SetActive(false);
     }
 }
