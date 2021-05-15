@@ -11,7 +11,6 @@ GameObject:
   - component: {fileID: 4366427675579864032}
   - component: {fileID: 2600447086126675550}
   - component: {fileID: 3446582307559231939}
-  - component: {fileID: 672219801702414379}
   m_Layer: 0
   m_Name: Sound
   m_TagString: Untagged
@@ -42,7 +41,7 @@ AudioSource:
   m_GameObject: {fileID: 5033250871471622718}
   m_Enabled: 1
   serializedVersion: 4
-  OutputAudioMixerGroup: {fileID: 24300002, guid: 626190e3b6e78e741bb5aac554acc24f, type: 2}
+  OutputAudioMixerGroup: {fileID: 2103487026579834803, guid: 626190e3b6e78e741bb5aac554acc24f, type: 2}
   m_audioClip: {fileID: 0}
   m_PlayOnAwake: 0
   m_Volume: 1
@@ -141,20 +140,3 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cdbe5ff12d449e34892402d27d25becd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &672219801702414379
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5033250871471622718}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9b91ecbcc199f4492b9a91e820070131, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  sceneId: 0
-  serverOnly: 0
-  visible: 0
-  m_AssetId: 
-  hasSpawned: 0

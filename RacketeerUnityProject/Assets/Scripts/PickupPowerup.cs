@@ -16,7 +16,7 @@ public class PickupPowerup : NetworkBehaviour
     
     private void OnTriggerEnter(Collider other)
     {
-        Debug.Log("Collision with powerup");
+        //Debug.Log("Collision with powerup");
         if (isServer && other.gameObject.tag == "Player" && !grantingPowerup)
         {
             //prevent granting more than once
@@ -31,7 +31,7 @@ public class PickupPowerup : NetworkBehaviour
             //create the powerup on non-server client player objects
             RpcCreatePowerupAbilityOnPlayer(other.gameObject.GetComponent<NetworkBehaviour>().netId);
 
-            SoundManager.PlaySound(pickedUpPowerupSoundName);
+            SoundManager.PlaySound(pickedUpPowerupSoundName, gameObject.transform.position);
 
             //remove the powerup item from play
             NetworkServer.Destroy(gameObject);

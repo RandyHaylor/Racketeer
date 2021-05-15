@@ -13,6 +13,11 @@ public class ChangeColorOnPlayerHit : NetworkBehaviour
     public float gainedBallSoundVolume = 0.7f;
     string _TintColor = "_TintColor";
 
+    private void Awake()
+    {
+        tempColor = new Color(1, 1, 1, 1);
+    }
+
     private void OnCollisionEnter(Collision collision)
     {
         if (collision.gameObject.tag == "Player")
@@ -21,13 +26,13 @@ public class ChangeColorOnPlayerHit : NetworkBehaviour
             {
                 newPlayerNumber = collision.gameObject.GetComponent<NetworkIdentity>().playerNumber;
                 if (GameManager.Instance.playerNumberOwningBall != newPlayerNumber)
-                    SoundManager.PlaySound(newPlayerGainedBallSoundName, gainedBallSoundVolume, 1, false);
+                    SoundManager.PlaySound(newPlayerGainedBallSoundName, transform.position);
                 GameManager.Instance.playerNumberOwningBall = newPlayerNumber;
 
                 colorCache.x = GameManager.Instance.playerColors[GameManager.Instance.playerNumberOwningBall].r;//collision.gameObject.GetComponent<MeshRenderer>().material.color.r;
-                colorCache.y = GameManager.Instance.playerColors[GameManager.Instance.playerNumberOwningBall].b;
-                colorCache.z = GameManager.Instance.playerColors[GameManager.Instance.playerNumberOwningBall].g;
-
+                colorCache.y = GameManager.Instance.playerColors[GameManager.Instance.playerNumberOwningBall].g;
+                colorCache.z = GameManager.Instance.playerColors[GameManager.Instance.playerNumberOwningBall].b;
+                
                 gameObject.GetComponent<MeshRenderer>().material.SetColor(_TintColor, GameManager.Instance.playerColors[GameManager.Instance.playerNumberOwningBall]);
 
                 RpcUpdateSphereColor(colorCache);
@@ -39,10 +44,11 @@ public class ChangeColorOnPlayerHit : NetworkBehaviour
     [ClientRpc]
     void RpcUpdateSphereColor(Vector3 colorRGB)
     {
+
         tempColor.r = colorRGB.x;
         tempColor.g = colorRGB.y;
         tempColor.b = colorRGB.z;
 
-        gameObject.GetComponent<MeshRenderer>().material.color = tempColor;
+        gameObject.GetComponent<MeshRenderer>().material.SetColor(_TintColor, new Color(tempColor.r, tempColor.g, tempColor.b, gameObject.GetComponent<MeshRenderer>().material.GetColor(_TintColor).a));
     }
 }

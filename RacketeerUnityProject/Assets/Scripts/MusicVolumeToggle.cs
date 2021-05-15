@@ -9,11 +9,11 @@ public class MusicVolumeToggle : MonoBehaviour
     public AudioMixerGroup musicMixerGroup;
     public void ToggleMusic()
     {
-        musicMixerGroup.audioMixer.GetFloat("MusicVolume", out float audioMixerLevel);
+        musicMixerGroup.audioMixer.GetFloat("MusicMuteGain", out float audioMixerLevel);
         Debug.Log("music level: " + audioMixerLevel);
         if (audioMixerLevel != 0)
-            musicMixerGroup.audioMixer.ClearFloat("MusicVolume");
+            musicMixerGroup.audioMixer.ClearFloat("MusicMuteGain");
         else
-            musicMixerGroup.audioMixer.SetFloat("MusicVolume", -80);
+            musicMixerGroup.audioMixer.SetFloat("MusicMuteGain", -80);
     }
 }

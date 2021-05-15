@@ -8,10 +8,10 @@ namespace Mirror
     public static class NetworkTime
     {
         /// <summary>Ping message frequency, used to calculate network time and RTT</summary>
-        public static float PingFrequency = 2.0f;
+        public static float PingFrequency = 0.5f;
 
         /// <summary>Average out the last few results from Ping</summary>
-        public static int PingWindowSize = 10;
+        public static int PingWindowSize = 40;
 
         static double lastPingTime;
 
@@ -24,8 +24,8 @@ namespace Mirror
             stopwatch.Start();
         }
 
-        static ExponentialMovingAverage _rtt = new ExponentialMovingAverage(10);
-        static ExponentialMovingAverage _offset = new ExponentialMovingAverage(10);
+        static ExponentialMovingAverage _rtt = new ExponentialMovingAverage(PingWindowSize);
+        static ExponentialMovingAverage _offset = new ExponentialMovingAverage(PingWindowSize);
 
         // the true offset guaranteed to be in this range
         static double offsetMin = double.MinValue;

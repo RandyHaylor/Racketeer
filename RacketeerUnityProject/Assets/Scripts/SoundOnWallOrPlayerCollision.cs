@@ -1,12 +1,11 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Mirror;
 
-public class SoundOnWallOrPlayerCollision : MonoBehaviour
+public class SoundOnWallOrPlayerCollision : NetworkBehaviour
 {
     public string audioClipName;
-    [Range(0,1)]
-    public float audioClipVolume = 0.7f;
     Rigidbody rb;
 
     private void Awake()
@@ -15,9 +14,12 @@ public class SoundOnWallOrPlayerCollision : MonoBehaviour
     }
     private void OnCollisionEnter(Collision collision)
     {
-        if (collision.other.CompareTag("Wall") || collision.other.CompareTag("Player") && rb.velocity.sqrMagnitude > 0.4f*GameManager.Instance.playerSpeedLimit* GameManager.Instance.playerSpeedLimit)
+        //if (NetworkRigidbodyController.IsResimulating) return; //don't trigger sounds during resimulation of physics frames
+          
+        if (collision.gameObject.CompareTag("Wall") || collision.gameObject.CompareTag("Player") && rb.velocity.sqrMagnitude > 0.4f*GameManager.Instance.playerSpeedLimit* GameManager.Instance.playerSpeedLimit)
         {
-            SoundManager.PlaySound(audioClipName, audioClipVolume*(0.2f + Mathf.Clamp(rb.velocity.magnitude /25f, 0f, 1)), 0.8f,true);
+            //Debug.Log("Playing a collision sound");
+            SoundManager.PlaySound(audioClipName, transform.position, SoundManager.UsersToPlayFor.SelfOnly, (0.2f + Mathf.Clamp(rb.velocity.magnitude /25f, 0f, 1)));
         }
     }
 }

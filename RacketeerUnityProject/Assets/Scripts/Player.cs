@@ -7,32 +7,47 @@ using UnityEngine.Audio;
 
 public class Player : NetworkBehaviour
 {
+    [Serializable]
+    public class PlayerInput
+    {
+        public float moveHorizontal;
+        public float moveVertical;
+        public float spin;
+        public bool boostButton;
+        public bool abilityButton;        
+    }
+    [Serializable]
+    public class PlayerInputForce
+    {
+        public Vector3 movement;
+        public Vector3 spin;
+        public PlayerInputForce()
+        {
+            movement = Vector3.zero;
+            spin = Vector3.zero;
+        }
+    }
+
+    public LinkedList<PlayerInputForce> playerInputForceBuffer;
+    private int playerInputForceBufferSize = 130; //effectively sets maximum supported latency no cost in leaving high, doing so to reduce the chance of this causing failure
+    private PlayerInputForce emptyPlayerInputForce;
+    private PlayerInputForce newPlayerInputForce;
+    public PlayerInputForce LastAppliedPlayerForce;
+
 
     [Header("Player Specific Settings")] [Range(0, 1)]
-    public float deadzone = 0.15f;
-    
-    
-    private Camera mainCam;
-    public bool attachedView;
-    private Vector3 strafe;
-    private Vector3 moveForward;
+    public float stickDeadzone = 0.2f;
+    public float triggerDeadzone = 0.2f;
+
     public ParticleSystem boostFireParticleSys;
     public string PlayerBoostSoundClip;
 
-    float moveHorizontal;
-    float horizontalMovementMult = 3000f;
-    float moveVertical;
-    float verticalMovementMult = 3000f;
-    float rotateStickHorizontal;
-    float rotate;
-    float rotateMult = -600f;
-    float rightTriggerAxis;
-    bool abilityButtonDown;
+    private PlayerInput localPlayerInputCache;
+    Vector3 directionalForce;
+    float horizontalMovementMult = 10f;
+    float verticalMovementMult = 10f;
+    float rotateMult = -10f;
 
-    float rotateBoostDuration = 0.1f;
-    bool rotateBoostActive = false;
-    float rotateBoostCooldown = 1f;
-    bool rotateBoostCoolingDown = false;
     float rotateBoostAmount;//for passing temporary amounts, normally 0
 
     bool velocityBoostActive = false;
@@ -49,12 +64,29 @@ public class Player : NetworkBehaviour
     {
         rb = this.gameObject.GetComponent<Rigidbody>();
         movement.z = 0f;
-        mainCam = Camera.main;
+        
+        directionalForce = Vector3.zero;
+        localPlayerInputCache = new PlayerInput();
+        emptyPlayerInputForce = new PlayerInputForce();
+        newPlayerInputForce = new PlayerInputForce();
+        LastAppliedPlayerForce = new PlayerInputForce();
+        //create and fill input buffer
+        playerInputForceBuffer = new LinkedList<PlayerInputForce>();
+        for (int i = 0; i < playerInputForceBufferSize - 1; i++)
+            playerInputForceBuffer.AddFirst(emptyPlayerInputForce);
+
+        StartCoroutine(RegisterWithNetworkRigidbodyController());
     }
-    
+    IEnumerator RegisterWithNetworkRigidbodyController()
+    {
+        yield return new WaitForEndOfFrame();
+        NetworkRigidbodyController.Instance.RegisterPlayer(netId, this, rb, isLocalPlayer, NetworkIdentity.spawned[netId].playerNumber);
+    }
+
     void FixedUpdate()
     {
-        if (!isServer) return;
+        //Debug.Log(gameObject.name + " isLocalPLayer? " + isLocalPlayer + " netId: " + netId);
+        //if (!isServer) return;
             //enforce maximum boosted speed limit on players
         if (rb.velocity.sqrMagnitude > GameManager.Instance.speedLimitBoostMultiplier * GameManager.Instance.playerSpeedLimit * GameManager.Instance.speedLimitBoostMultiplier * GameManager.Instance.playerSpeedLimit)
             rb.velocity = GameManager.Instance.speedLimitBoostMultiplier * GameManager.Instance.playerSpeedLimit * rb.velocity.normalized;
@@ -63,74 +95,35 @@ public class Player : NetworkBehaviour
     }
     void Update()
     {
-        if (isLocalPlayer) HandleInput();
+        
     }
-    void HandleInput()
+    public void HandleInput()
     {
-        moveHorizontal = Mathf.Clamp(Input.GetAxis("LeftStickHorizontal") + Input.GetAxis("Horizontal"), -1, 1);
-        moveVertical = Mathf.Clamp(Input.GetAxis("LeftStickVertical") + Input.GetAxis("Vertical"), -1, 1);
-        if (Math.Abs(moveHorizontal) < deadzone) moveHorizontal = 0f;
-        if (Math.Abs(moveVertical) < deadzone) moveVertical = 0f;
-        //movement = new Vector3(moveHorizontal * horizontalMovementMult, moveVertical* verticalMovementMult, 0);
+        //Debug.Log("Called HandleInput nettime: " + NetworkTime.time);
+        localPlayerInputCache.moveHorizontal = Mathf.Clamp(Input.GetAxis("LeftStickHorizontal") + Input.GetAxis("Horizontal"), -1, 1);
+        localPlayerInputCache.moveVertical = Mathf.Clamp(Input.GetAxis("LeftStickVertical") + Input.GetAxis("Vertical"), -1, 1);
+        if (Math.Abs(localPlayerInputCache.moveHorizontal) < stickDeadzone) localPlayerInputCache.moveHorizontal = 0f;
+        if (Math.Abs(localPlayerInputCache.moveVertical) < stickDeadzone) localPlayerInputCache.moveVertical = 0f;
 
-        //  movement and rotate are global objects because they get re-used each frame
-        movement.x = moveHorizontal * horizontalMovementMult * Time.deltaTime;
-        movement.y = moveVertical * verticalMovementMult * Time.deltaTime;
+        localPlayerInputCache.moveHorizontal = localPlayerInputCache.moveHorizontal * horizontalMovementMult * Time.deltaTime;
+        localPlayerInputCache.moveVertical = localPlayerInputCache.moveVertical * verticalMovementMult * Time.deltaTime;
 
         //right stick slower rotation code   
-        rotateStickHorizontal = Input.GetAxis("RightStickHorizontal"); 
-        if (Math.Abs(rotateStickHorizontal) < deadzone) rotateStickHorizontal = 0f;
-        rotate = rotateMult * rotateStickHorizontal * Time.deltaTime;
+        localPlayerInputCache.spin = Input.GetAxis("RightStickHorizontal"); 
+        if (Math.Abs(localPlayerInputCache.spin) < stickDeadzone) localPlayerInputCache.spin = 0f;
+        localPlayerInputCache.spin = rotateMult * localPlayerInputCache.spin * Time.deltaTime;
 
-        //rotational boost code (triggers)
-        rightTriggerAxis = Input.GetAxis("RightTriggerAxis");
 
-        if (rightTriggerAxis > 0.2f && !rotateBoostCoolingDown && !rotateBoostActive) //Math.Abs(rightTriggerAxis)
-        {
-            if (rightTriggerAxis>0f)
-            {
-                rotateBoostAmount = rotateMult * 2;
-            }
-            else
-            {
-                rotateBoostAmount = rotateMult * - 2;
-            }
-            rotateBoostActive = true;
-            velocityBoostActive = true;
-            StartCoroutine(VelocityBoostTimer());
-            StartCoroutine(AngularBoostTimer());
-            
-            //play boost sound and particle system on self and other clients
-            SoundManager.PlaySound(PlayerBoostSoundClip, 0.25f, 0.4f, true);
-            
-            boostFireParticleSys.Play();
-            CmdPlayerBoostParticles();
-            
-        }
+        localPlayerInputCache.boostButton = (Input.GetAxis("RightTriggerAxis") > triggerDeadzone);
+        localPlayerInputCache.abilityButton = (Input.GetAxis("LeftTriggerAxis") > triggerDeadzone);
 
-        if (attachedView)
-        {
-            moveForward = movement.y * transform.up;
-            strafe = movement.x * transform.right;
-            rotate = rotate / 4;
-        }
-        else
-        {
-            strafe = movement.y * Vector3.up;
-            moveForward = movement.x*Vector3.right;
-        }
-            
-        abilityButtonDown = (Input.GetAxis("LeftTriggerAxis") > 0.1f);
-        
-        //only send movement updates to server if rewinding is not active
-        if (!GameManager.Instance.syncVar_RewindingActive) CmdApplyInputOnServer(strafe+moveForward, rotate, rotateBoostActive, velocityBoostActive, abilityButtonDown);
+
+        ApplyPlayerInput(localPlayerInputCache);
+        if (!isServer) CmdApplyInputOnServer(localPlayerInputCache);
+
     }
-    [Command(requiresAuthority = false)] void CmdPlayerBoostParticles() => RpcPlayerBoostParticles();
+
     [ClientRpc] void RpcPlayerBoostParticles() { if (!isLocalPlayer) boostFireParticleSys.Play(); }
-
-    [Command(requiresAuthority = false)] void CmdPlayerBoostSoundOtherPlayers() => RpcPlayerBoostSound();
-    [ClientRpc] void RpcPlayerBoostSound(){if (!isLocalPlayer) SoundManager.PlaySound(PlayerBoostSoundClip, 0.25f, 0.4f, true);}
-
 
     IEnumerator VelocityBoostTimer()
     {
@@ -140,44 +133,102 @@ public class Player : NetworkBehaviour
         yield return new WaitForSeconds(velocityBoostCooldown);
         velocityBoostCoolingDown = false;
     }
-    IEnumerator AngularBoostTimer()
-    {
-        //Debug.Log("Started AngularBoostTimer Coroutine");
-        yield return new WaitForSeconds(rotateBoostDuration);
-        rotateBoostCoolingDown = true;
-        rotateBoostActive = false;
-        rotateBoostAmount = 0f;
-        yield return new WaitForSeconds(rotateBoostCooldown);
-        rotateBoostCoolingDown = false;
-    }
 
 
     [Command(requiresAuthority = false)] // function following this line is run only on server, and will therefore only affect server object (which has a rigidbody for physics sim)
-    void CmdApplyInputOnServer(Vector3 directionalForce, float rotationalForce, bool rotationalBoostActive, bool velocityBoostActiveClient, bool activateAbility)
+    void CmdApplyInputOnServer(PlayerInput rawPlayerInput) => ApplyPlayerInput(rawPlayerInput);
+    
+    void ApplyPlayerInput(PlayerInput rawPlayerInput)
     {
-        if (GameManager.Instance.syncVar_RewindingActive) return; //discarding all movement input/force application during rewind
-        //if speed in the direction the user is pointing is below the speed limit, apply the movement force
-        if (Vector3.Dot(rb.velocity, directionalForce.normalized) < (GameManager.Instance.playerSpeedLimit * (velocityBoostActiveClient? GameManager.Instance.speedLimitBoostMultiplier : 1f) ))
-            rb.AddForce(directionalForce * GameManager.Instance.playerBaseMovementForce * (velocityBoostActiveClient ? GameManager.Instance.velocityBoostMultiplier : 1f));
-        
-        //if the angular speed is below the angular speed limit, apply the angular force
-        if (
-                (rotationalForce > 0  && rb.angularVelocity.z < (velocityBoostActiveClient ? GameManager.Instance.angularSpeedLimitBoost : GameManager.Instance.angularSpeedLimitNormal) )
-                ||
-                (rotationalForce < 0 && rb.angularVelocity.z > -1 * (velocityBoostActiveClient ? GameManager.Instance.angularSpeedLimitBoost : GameManager.Instance.angularSpeedLimitNormal))
-            )
-            rb.AddTorque(transform.forward * rotationalForce* GameManager.Instance.playerBaseAngularMovementForce * (velocityBoostActiveClient ? GameManager.Instance.rotationalBoostMultiplier : 1f));
+        if (TimeController.Instance.IsRewinding)
+        {
+            if (isLocalPlayer && !isServer) //hosting player doesn't buffer input forces, they're the authority
+            {
+                playerInputForceBuffer.AddFirst(emptyPlayerInputForce); //recording the zero input force for resimulations
+                while (playerInputForceBuffer.Count > playerInputForceBufferSize)
+                    playerInputForceBuffer.RemoveLast();
+            }
 
-        //if user is pressing the ability button, look for an inactive ability and use it then remove it
-        if (activateAbility)
+            LastAppliedPlayerForce = emptyPlayerInputForce;
+
+            return;  //currently ignoring/discarding all player inputs during rewind
+        }
+
+        if (rawPlayerInput.boostButton && !velocityBoostCoolingDown && !velocityBoostActive) //Math.Abs(rightTriggerAxis)
+        {
+            velocityBoostActive = true;
+            StartCoroutine(VelocityBoostTimer());
+
+            //play boost sound and particle system on self and other clients
+            if (isLocalPlayer) SoundManager.PlaySound(PlayerBoostSoundClip, transform.position, SoundManager.UsersToPlayFor.SelfLocallyThenEveryone);
+
+            if (isLocalPlayer) boostFireParticleSys.Play();
+            else RpcPlayerBoostParticles();
+        }
+
+
+
+        directionalForce.x = rawPlayerInput.moveHorizontal;
+        directionalForce.y = rawPlayerInput.moveVertical;
+
+
+
+
+
+        //if speed in the direction the user is pointing is below the speed limit, apply the movement force
+        if (Vector3.Dot(rb.velocity, directionalForce.normalized) < (GameManager.Instance.playerSpeedLimit * (velocityBoostActive ? GameManager.Instance.speedLimitBoostMultiplier : 1f)))
+            newPlayerInputForce.movement = directionalForce * GameManager.Instance.playerBaseMovementForce * (velocityBoostActive ? GameManager.Instance.velocityBoostMultiplier : 1f);
+        else
+            newPlayerInputForce.movement = Vector3.zero;
+
+
+        //if the angular speed is below the angular speed limit in the desired rotation direction, apply the angular force
+        if (
+                (rawPlayerInput.spin > 0 && rb.angularVelocity.z < (velocityBoostActive ? GameManager.Instance.angularSpeedLimitBoost : GameManager.Instance.angularSpeedLimitNormal))
+                ||
+                (rawPlayerInput.spin < 0 && rb.angularVelocity.z > -1 * (velocityBoostActive ? GameManager.Instance.angularSpeedLimitBoost : GameManager.Instance.angularSpeedLimitNormal))
+            )
+            newPlayerInputForce.spin = transform.forward * rawPlayerInput.spin * GameManager.Instance.playerBaseAngularMovementForce * (velocityBoostActive ? GameManager.Instance.rotationalBoostMultiplier : 1f);
+        else
+            newPlayerInputForce.spin = Vector3.zero;
+
+        //apply forces on server
+        if (isServer)
+        {
+            ApplyForcesLocally(newPlayerInputForce.movement, newPlayerInputForce.spin);
+        }
+        else if (isLocalPlayer)//add new force to local buffer if is local player && not server (hosting client doesn't buffer input forces, they're the authority)
+        {
+            playerInputForceBuffer.AddFirst(newPlayerInputForce);  //forces applied in rigidbodystreamer script
+            while (playerInputForceBuffer.Count > playerInputForceBufferSize)
+                playerInputForceBuffer.RemoveLast();
+        }
+
+        LastAppliedPlayerForce = newPlayerInputForce;
+
+        //if user is pressing the ability button, look for an inactive ability and use it then remove it, happens locally and on server separately (server is auth tho, local is just a guess)
+        if (rawPlayerInput.abilityButton)
         {
             playerAbility = GetComponentInChildren<PlayerAbility>();
             if (playerAbility != null && !playerAbility.activatingPlayerAbility)
             {
                 if (playerAbility.ActivatePlayerAbility())
-                    RemovePlayerAbilityClientAndServer();
+                {
+                    if (isLocalPlayer)
+                        playerAbility.PlayAbilitySoundLocalThenEveryoneElse(); // local player gets responsibility for triggering ability sound everywhere so they can play first
+                    
+                    if (isServer) RemovePlayerAbilityClientAndServer(); //server or hosting client removes powerup locally then removes on everyone
+                    else RemovePlayerAbility(); //remove locally for visual responsiveness (will create a potential window where you can't pick up another powerup due to latency)
+                }                    
             }
         }
+    }
+
+    public void ApplyForcesLocally(Vector3 movementForce, Vector3 angularForce)
+    {
+        if (rb == null) return;
+        rb.AddForce(movementForce, ForceMode.Impulse);
+        rb.AddTorque(angularForce, ForceMode.Impulse);
     }
 
     void RemovePlayerAbilityClientAndServer()

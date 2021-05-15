@@ -9,8 +9,6 @@ public class SoundWhenCollide : NetworkBehaviour
     public string playerBounceSoundName;
     [Range(0,1)]
     public float ballBounceVolume;
-    public float pitchMultiplier = 1;
-    public bool randomizePitch = false;
 
     Rigidbody rigidbody;
     private void Awake()
@@ -20,18 +18,11 @@ public class SoundWhenCollide : NetworkBehaviour
 
     private void OnCollisionEnter(Collision collision)
     {
-        if (isServer)
-        {
-            CmdPlaySound(rigidbody.velocity.magnitude, collision.transform.tag == "Player" ? playerBounceSoundName : wallBounceSoundName);
-        }
-            
+        //if (NetworkRigidbodyController.IsResimulating) return; //don't trigger sounds during resimulation of physics frames
+        SoundManager.PlaySound
+            (collision.transform.tag == "Player" ? playerBounceSoundName : wallBounceSoundName
+            , transform.position, SoundManager.UsersToPlayFor.SelfOnly
+            , (0.2f + Mathf.Clamp(rigidbody.velocity.magnitude / 25f, 0f, 0.7f)) * ballBounceVolume);
     }
-
-    [ClientRpc]
-    private void CmdPlaySound(float rigidbodySpeed, string audioClipName)
-    {
-        SoundManager.PlaySound(audioClipName, (0.2f + Mathf.Clamp(rigidbodySpeed / 25f, 0f, 0.7f))* ballBounceVolume, pitchMultiplier, randomizePitch);        
-    }
-
 
 }

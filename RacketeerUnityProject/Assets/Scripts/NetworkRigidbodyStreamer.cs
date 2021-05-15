@@ -51,13 +51,19 @@ public class NetworkRigidbodyStreamer : NetworkBehaviour
     {
         None = 0,
         FrameCountBuffer = 1,
-        NetworkTime = 2
+        NetworkTime = 2,
+        Predictive = 3
     }
 
     LinkedList<UpdateRibidbodyItem> updateBuffer;
     LinkedList<UpdateRibidbodyItem> updateHistory;
     double lastUpdateNetworktime;
 
+
+    bool hasPlayerComponent = false;
+    Player playerComponent;
+    Vector3 lastMovementForce;
+    Vector3 lastAngularForce;
 
     internal class UpdateRibidbodyItem
     {
@@ -72,6 +78,10 @@ public class NetworkRigidbodyStreamer : NetworkBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        lastMovementForce = Vector3.zero;
+        lastAngularForce = Vector3.zero;
+        playerComponent = gameObject.GetComponent<Player>();
+        if (playerComponent != null) hasPlayerComponent = true;
         lastUpdateNetworktime = 0;
         updateBuffer = new LinkedList<UpdateRibidbodyItem>();
         updateHistory = new LinkedList<UpdateRibidbodyItem>();
@@ -109,13 +119,18 @@ public class NetworkRigidbodyStreamer : NetworkBehaviour
         }
         else //owner state
         {
-            if (isServer) RpcUpdateRigidbodyOnClients(rigidBody.velocity, rigidBody.angularVelocity, rigidBody.position, rigidBody.rotation, NetworkTime.time);
-            else CmdUpdateRigidbodyOnServer(rigidBody.velocity, rigidBody.angularVelocity, rigidBody.position, rigidBody.rotation, NetworkTime.time);
+            if (hasPlayerComponent)
+            {
+                lastMovementForce = playerComponent.LastAppliedPlayerForce.movement;
+                lastAngularForce = playerComponent.LastAppliedPlayerForce.spin;
+            }
+            if (isServer) RpcUpdateRigidbodyOnClients(rigidBody.velocity, rigidBody.angularVelocity, rigidBody.position, rigidBody.rotation, NetworkTime.time, lastMovementForce, lastAngularForce);
+            else CmdUpdateRigidbodyOnServer(rigidBody.velocity, rigidBody.angularVelocity, rigidBody.position, rigidBody.rotation, NetworkTime.time, lastMovementForce, lastAngularForce);
         }
     }
 
     [Command(channel = Channels.Unreliable)]
-    void CmdUpdateRigidbodyOnServer(Vector3 rigidBodyVelocity, Vector3 rigidBodyAngularVelocity, Vector3 rigidBodyPosition, Quaternion rigidBodyRotation, double networkTime)
+    void CmdUpdateRigidbodyOnServer(Vector3 rigidBodyVelocity, Vector3 rigidBodyAngularVelocity, Vector3 rigidBodyPosition, Quaternion rigidBodyRotation, double networkTime, Vector3 lastAppliedForce, Vector3 lastAppliedAngularForce)
     {   
         //UNTESTED... needs to be tested with clientAuthority on
         if (NetworkServer.connections.Count > 0 && !isClient) //if a client is sending to a dedicated server, that should update it's own buffer
@@ -128,17 +143,19 @@ public class NetworkRigidbodyStreamer : NetworkBehaviour
             } //don't apply out of order updates - ignore them
             lastUpdateNetworktime = networkTime;
 
+            lastMovementForce = lastAppliedForce;
+            lastAngularForce = lastAppliedAngularForce;
 
             if (bufferType != BufferType.None)
                 AddItemToUpdateBuffer(rigidBodyVelocity, rigidBodyAngularVelocity, rigidBodyPosition, rigidBodyRotation, networkTime);
             else
                 ApplyRigidbodyUpdates(rigidBodyVelocity, rigidBodyAngularVelocity, rigidBodyPosition, rigidBodyRotation, networkTime);
         }
-        RpcUpdateRigidbodyOnClients(rigidBodyVelocity, rigidBodyAngularVelocity, rigidBodyPosition, rigidBodyRotation, networkTime); //send updates to all clients
+        RpcUpdateRigidbodyOnClients(rigidBodyVelocity, rigidBodyAngularVelocity, rigidBodyPosition, rigidBodyRotation, networkTime, lastAppliedForce, lastAppliedAngularForce); //send updates to all clients
     }
 
     [ClientRpc(channel = Channels.Unreliable)]
-    void RpcUpdateRigidbodyOnClients(Vector3 rigidBodyVelocity, Vector3 rigidBodyAngularVelocity, Vector3 rigidBodyPosition, Quaternion rigidBodyRotation, double networkTime)
+    void RpcUpdateRigidbodyOnClients(Vector3 rigidBodyVelocity, Vector3 rigidBodyAngularVelocity, Vector3 rigidBodyPosition, Quaternion rigidBodyRotation, double networkTime, Vector3 lastAppliedForce, Vector3 lastAppliedAngularForce)
     {
         if (NetworkServer.connections.Count > 0)
         {
@@ -154,6 +171,8 @@ public class NetworkRigidbodyStreamer : NetworkBehaviour
         
         lastUpdateNetworktime = networkTime;
 
+        lastMovementForce = lastAppliedForce;
+        lastAngularForce = lastAppliedAngularForce;
 
         if (bufferType != BufferType.None)
             AddItemToUpdateBuffer(rigidBodyVelocity, rigidBodyAngularVelocity, rigidBodyPosition, rigidBodyRotation, networkTime);
@@ -226,7 +245,7 @@ public class NetworkRigidbodyStreamer : NetworkBehaviour
                 }
             }
         }
-        else if (bufferType == BufferType.NetworkTime) //Networktime.time is currently NOT syncing, so this is broken
+        else if (bufferType == BufferType.NetworkTime)
         {
             if (updateBuffer == null) updateBuffer = new LinkedList<UpdateRibidbodyItem>();
             if (updateBuffer.Count == 0)
@@ -270,6 +289,16 @@ public class NetworkRigidbodyStreamer : NetworkBehaviour
                 return;
             }
             //if neither previous case applies, continue to apply the buffered update
+
+        }
+        else if (bufferType == BufferType.Predictive)
+        {
+            if (updateBuffer == null) updateBuffer = new LinkedList<UpdateRibidbodyItem>();
+            if (updateBuffer.Count == 0)
+            {
+                if (debugWithThisObject && gameObject.name == debuggingTargetGameObjName) Debug.Log("networkTime buffer: updateBuffer.Count == 0" + " Time.time: " + Time.time);
+                return;
+            }
 
         }
         else

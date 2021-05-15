@@ -140,8 +140,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   syncMode: 0
   syncInterval: 0.1
-  deadzone: 0.15
-  attachedView: 0
+  LastAppliedPlayerForce:
+    movement: {x: 0, y: 0, z: 0}
+    spin: {x: 0, y: 0, z: 0}
+  stickDeadzone: 0.2
+  triggerDeadzone: 0.2
   boostFireParticleSys: {fileID: 6087798155934897428}
   PlayerBoostSoundClip: PlayerBoostSound
 --- !u!114 &2100380162154616858
@@ -241,7 +244,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1897227679105932991}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 06f58b11a4e22e844bab3a6736dcddf2, type: 3}
   m_Name: 
@@ -276,7 +279,7 @@ MonoBehaviour:
   _mode: 1
   _globalClockKey: BallAndPlayers
   _rewindable: 1
-  _recordingDuration: 3
+  _recordingDuration: 4
 --- !u!114 &2190444409830663259
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -289,8 +292,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c6b1ccdf192917c4d9f5f079f866d15f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  audioClipName: PlayerWallIImpact
-  audioClipVolume: 0.55
+  syncMode: 0
+  syncInterval: 0.016
+  audioClipName: PlayerWallImpact
 --- !u!1001 &6091845907113427778
 PrefabInstance:
   m_ObjectHideFlags: 0

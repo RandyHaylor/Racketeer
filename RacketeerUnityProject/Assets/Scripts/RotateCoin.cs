@@ -5,16 +5,20 @@ using UnityEngine;
 public class RotateCoin : MonoBehaviour
 {
     [SerializeField]
-    private float rotateSpeed = 1.0f;
+    public float rotateSpeed = 1.0f;
+    Vector3 random3dRotation;
     void Start()
     {
-        StartCoroutine(Spin());
+        random3dRotation = Random.insideUnitSphere;
+        var newRotation = transform.rotation * Quaternion.AngleAxis(60f, Random.insideUnitCircle);
+        transform.rotation = newRotation;
+        StartCoroutine(Spin(random3dRotation));
     }
-    private IEnumerator Spin()
+    private IEnumerator Spin(Vector3 rotation)
     {
         while (true)
         {
-            transform.Rotate(0, 0, rotateSpeed * Time.deltaTime * 100);
+            transform.Rotate(rotation.x * Time.deltaTime * rotateSpeed, rotation.y * Time.deltaTime * rotateSpeed, rotation.z * Time.deltaTime * rotateSpeed);
             yield return new WaitForEndOfFrame();
         }
     }

@@ -21,8 +21,9 @@ public class GameManager : NetworkBehaviour
 
     public List<Color> playerColors;
 
-    [SyncVar] public bool syncVar_RewindingActive;
-    public AudioClip initialCountdownSound; 
+    public string CountdownSound;
+    public string PointGainedSound;
+
     public float wallTurningRate;
     private Quaternion _previousRotation = Quaternion.identity;
     private Quaternion _targetRotation = Quaternion.identity;
@@ -242,6 +243,7 @@ public class GameManager : NetworkBehaviour
 
     public void StartLevel()
     {
+        Debug.Log("StartLevel() called: isServer: " + isServer);
         CmdStartLevel();
     }
 
@@ -261,7 +263,7 @@ public class GameManager : NetworkBehaviour
 
         CameraFollowsPlayer(true);
 
-        SoundManager.ServerPlayMusic("LevelMusic");
+        SoundManager.PlayMusic("LevelMusic");
     }
 
     public static void EndLevel()
@@ -328,7 +330,7 @@ public class GameManager : NetworkBehaviour
 
     public void StartNewRound()
     {
-        Debug.Log("Called Start new round");
+        Debug.Log("Called Start new round, isServer: " + isServer);
         CmdStartNewRound(defaultRoundTime);
     }
 
@@ -397,7 +399,8 @@ public class GameManager : NetworkBehaviour
         RpcEnableCenterCountdownTimer(true);
         for (int i = currentCountdownTime; i >= 0; i--)
         {
-            SoundManager.PlaySound("CountdownSound", 0.6f, 1, false);
+            SoundManager.PlaySound(CountdownSound);
+
             CenterCountdownText.text = i.ToString();
             RpcUpdateCountdownText(i.ToString());
             yield return new WaitForSeconds(1);
@@ -409,7 +412,7 @@ public class GameManager : NetworkBehaviour
 
         //start round music on server and clients
         Debug.Log("GameManager Calling PlayMusic for round");
-        SoundManager.ServerPlayMusic("RoundMusic");
+        SoundManager.PlayMusic("RoundMusic");
 
 
         roundActive = true;
@@ -420,7 +423,7 @@ public class GameManager : NetworkBehaviour
         for (int i = currentRoundTime; i >= 0; i--)
         {
             if (!roundActive) continue;
-            Debug.Log("Current Round Time Remaining: " + i);
+            //Debug.Log("Current Round Time Remaining: " + i);
             RoundTimeTextField.text = i.ToString();
             RpcUpdateRoundTimeText(i.ToString());
             yield return new WaitForSeconds(1);
@@ -487,6 +490,7 @@ public class GameManager : NetworkBehaviour
     {
         if (playerNumberOwningBall > -1 && (roundActive || levelActive))
         {
+            SoundManager.PlaySound(PointGainedSound);
             playerScores[playerNumberOwningBall] += 1;
             UpdatePlayerScores();
             if (levelActive)

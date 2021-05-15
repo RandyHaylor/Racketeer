@@ -20,7 +20,7 @@ public class DissapearOnBallCollide : NetworkBehaviour
         {
             //Debug.Log("Coin being removed");
             beingDestroyed = true;
-            SoundManager.PlaySound(collectedSound, collectedSoundVolume, 1, false);
+            SoundManager.PlaySound(collectedSound, transform.position);
             if (spanwNewItemCollected) PrefabSpawner.SpawnNewObject(prefabNameToSpawn, new Vector3(Random.Range(-8f, 8f), Random.Range(-4f, 4f), 0f), Quaternion.identity*Quaternion.Euler(90, 0, 0));
             StartCoroutine(DestroyAfterTime(0.05f, GameManager.Instance.playerNumberOwningBall));
             GameManager.AddPointForOwningPlayer();

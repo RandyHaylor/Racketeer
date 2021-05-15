@@ -18,7 +18,11 @@ public abstract class PlayerAbility : MonoBehaviour
     }
 
     public abstract bool ActivatePlayerAbility();
-    
+
+    public void PlayAbilitySoundLocalThenEveryoneElse()
+    {
+        SoundManager.PlaySound(abilitySoundName, transform.position, SoundManager.UsersToPlayFor.SelfLocallyThenEveryone);
+    }   
 
     public virtual void RemovePlayerAbility()
     {

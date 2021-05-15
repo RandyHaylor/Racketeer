@@ -13,6 +13,7 @@ public class MasterVolumeChanger : MonoBehaviour
     {        
         float sliderValue = gameObject.GetComponent<Slider>().value;
         Debug.Log("new slider level: " + sliderValue);
+
         mixer.SetFloat("MasterVolume", Mathf.Log10(sliderValue) * 20);
         GUI.FocusControl(null);
     }

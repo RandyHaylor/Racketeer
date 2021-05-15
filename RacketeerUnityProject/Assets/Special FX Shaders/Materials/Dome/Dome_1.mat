@@ -4,8 +4,9 @@
 Material:
   serializedVersion: 6
   m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
   m_Name: Dome_1
   m_Shader: {fileID: 4800000, guid: bf3d233a35872954b94ff8b50fb3e982, type: 3}
   m_ShaderKeywords: 
@@ -79,7 +80,7 @@ Material:
     - _BiasMT: 1
     - _BiasMT2: 1
     - _BiasMT3: 1
-    - _Bri: 0
+    - _Bri: 0.275
     - _BumpScale: 1
     - _Con: 1
     - _Cutoff: 0.5
@@ -133,7 +134,7 @@ Material:
     - _DslEC: {r: 1, g: 0, b: 0, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _EmissionColorUI: {r: 1, g: 1, b: 1, a: 1}
-    - _InterColor: {r: 1, g: 0, b: 0.8896551, a: 1}
+    - _InterColor: {r: 0, g: 1, b: 0.07667947, a: 1}
     - _Pan1: {r: 0.1, g: 0.18, b: 0, a: 0}
     - _Pan2: {r: 0, g: 0.03, b: 0, a: 0}
     - _Pan3: {r: 0.02, g: 0, b: 0, a: 0}
@@ -152,4 +153,5 @@ Material:
     - _Tile3: {r: 1, g: 1, b: 0, a: 0}
     - _TileDs: {r: 1, g: 1, b: 0, a: 0}
     - _TileDsl: {r: 1, g: 1, b: 0, a: 0}
-    - _TintColor: {r: 0.33991337, g: 0.31318456, b: 0.6655172, a: 0.68235296}
+    - _TintColor: {r: 0.15686275, g: 0.14901961, b: 0.40392157, a: 0.64705884}
+  m_BuildTextureStacks: []

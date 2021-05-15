@@ -885,6 +885,7 @@ namespace Mirror
             identity.transform.localScale = message.scale;
             identity.hasAuthority = message.isOwner;
             identity.netId = message.netId;
+            identity.playerNumber = message.playerNumber;
 
             if (message.isLocalPlayer)
                 InternalAddPlayer(identity);

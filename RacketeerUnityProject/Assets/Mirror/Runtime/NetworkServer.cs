@@ -559,6 +559,8 @@ namespace Mirror
             conn.identity = identity;
 
             conn.identity.playerNumber = conn.playerNumber;
+            identity.playerNumber = conn.playerNumber;
+            Debug.Log("Assigned Player Number: " + conn.playerNumber + "to conn.identity in AddPlayerForConnection()");
 
             // Set the connection on the NetworkIdentity on the server, NetworkIdentity.SetLocalPlayer is not called on the server (it is on clients)
             identity.SetClientOwner(conn);
@@ -818,6 +820,7 @@ namespace Mirror
                     isOwner = isOwner,
                     sceneId = identity.sceneId,
                     assetId = identity.assetId,
+                    playerNumber = identity.playerNumber,
                     // use local values for VR support
                     position = identity.transform.localPosition,
                     rotation = identity.transform.localRotation,

@@ -1,16 +1,15 @@
 
+using Mirror;
+
 public class RewindPlayerAbility : PlayerAbility
 {
-    public string AbilitySoundName;
     public override bool ActivatePlayerAbility()
     {
-        if (activatingPlayerAbility || GameManager.Instance.syncVar_RewindingActive) return false;
+        if (activatingPlayerAbility || TimeController.Instance.IsRewinding) return false;
         activatingPlayerAbility = true;
-        if (TimeController.Instance.IsRewinding) return false;
         
-        TimeController.Instance.RewindTime(transform.parent.gameObject);
-
-        SoundManager.PlaySound(AbilitySoundName);
+        TimeController.Instance.RewindTime(transform.parent.gameObject.GetComponent<NetworkBehaviour>().netId);
+        
         return true;
     }
 }
