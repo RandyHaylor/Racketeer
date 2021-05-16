@@ -69,22 +69,19 @@ public class TimeController : NetworkBehaviour
     {
         if (!isServer) //non-hosting client starts rewinding immediately locally if they're the triggering party
         {
-            if (!IsRewinding)
-                RewindTimeInternal("BallAndPlayers", objectNetIdToExempt);
+            RewindTimeInternal("BallAndPlayers", objectNetIdToExempt);
         }
         else //server gets separate command from player about button press and handles it differently. if client is already rewinding, new rewinding won't start
         {
             RpcRewindTime("BallAndPlayers", objectNetIdToExempt); //rewind won't run if it's already running, calling client will get a command to rewind from server but will ignore it
             RewindTimeInternal("BallAndPlayers", objectNetIdToExempt);
         }           
-        
     }
 
     [ClientRpc]
     void RpcRewindTime(string clockKeyName, uint objectNetIdToExempt)
     {
-        if (!IsRewinding)  
-            RewindTimeInternal(clockKeyName, objectNetIdToExempt);
+         RewindTimeInternal(clockKeyName, objectNetIdToExempt);
     }
 
     void RewindTimeInternal(string clockKey) => RewindTimeInternal(clockKey, 999999999);
@@ -99,7 +96,12 @@ public class TimeController : NetworkBehaviour
 
         GameObject objectToExempt = null;
         if (objectNetIdToExempt != 999999999)
+        {
+            SyncVar_playerControllingRewind = objectNetIdToExempt;
             objectToExempt = NetworkIdentity.spawned[objectNetIdToExempt].gameObject;
+        }
+        else
+            SyncVar_playerControllingRewind = 999999999;
 
         Debug.Log("RewindTimeCoroutine objectToExempt name: " + (objectToExempt == null ? "null" : objectToExempt.name));
        
@@ -117,11 +119,12 @@ public class TimeController : NetworkBehaviour
         //ensure timescale is set and wait specified time    
         Timekeeper.instance.Clock(clockKey).localTimeScale = rewindTimeScale;
         float startTime = Time.time;
-        while (startTime + rewindDuration > Time.time)
+        while (startTime + rewindDuration> Time.time) // + (isServer ? 0 : NetworkTime.rtt) 
         {
             yield return new WaitForFixedUpdate();
             if (SyncVar_playerControllingRewind != objectNetIdToExempt) //detect a server/client discrepancy in who pressed rewind first during a rewind, then try messy mid-rewind fix...
             {
+                Debug.Log("Detected difference in syncvar");
                 NetworkIdentity.spawned[objectNetIdToExempt].gameObject.GetComponent<Timeline>().rewindable = true;
                 if (SyncVar_playerControllingRewind != 999999999)
                     NetworkIdentity.spawned[SyncVar_playerControllingRewind].gameObject.GetComponent<Timeline>().rewindable = false;

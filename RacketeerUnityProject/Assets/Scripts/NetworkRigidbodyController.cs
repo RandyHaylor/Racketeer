@@ -4,6 +4,7 @@ using UnityEngine;
 using Mirror;
 using System;
 using System.Linq;
+using Chronos;
 
 public class NetworkRigidbodyController : NetworkBehaviour
 {
@@ -162,6 +163,10 @@ public class NetworkRigidbodyController : NetworkBehaviour
         }
 
         //---NON-SERVER CLIENT-----        
+        if (TimeController.Instance.IsRewinding) //needed for rewind-time effect. TODO: Decouple this (generic event that requires inputs to be ingored until another event?)
+        {
+            Physics.Simulate(Time.fixedDeltaTime); //don't resimulate anything or apply forces during rewind, just let the frame run as normal.
+        }
         if (incomingUpdatesAlreadyProcessed) //no new update from server, apply last input for current frame & run as if local
         {
             ApplyLatestForces(); //does not run Physics.Simulate - applies latest input buffer and continues to predict
@@ -170,6 +175,7 @@ public class NetworkRigidbodyController : NetworkBehaviour
         else //there's a new update from the server, reset object positions to that update, then roll time forward through physics frames & prediction
         {
             isResimulating = true;
+            Timekeeper.instance.Clock("Root").paused = true;
             ResetPositionsAndRotations();
             PredictFromUpdatedServerState(); //runs Physics.Simulate 1 or more times, isResimulating is false for the last simulation            
         }
@@ -229,8 +235,12 @@ public class NetworkRigidbodyController : NetworkBehaviour
                         NetworkRigidbodyPlayers[i].RigidbodyComponent.AddTorque(NetworkRigidbodyPlayers[i].PlayerComponent.LastAppliedPlayerForce.spin * (j == 1 ? lastFrameFraction : 1), ForceMode.Impulse);
                     }
                 }
-            }            
-            if (j == 0) isResimulating = false; //last full frame is a 'new frame' for any non-predictive physics items
+            }
+            if (j == 0)
+            {
+                isResimulating = false; //last full frame is a 'new frame' for any non-predictive physics items
+                Timekeeper.instance.Clock("Root").paused = false;
+            }
             Physics.Simulate(Time.fixedDeltaTime * (j == 1 ? lastFrameFraction : 1));
         }
     }

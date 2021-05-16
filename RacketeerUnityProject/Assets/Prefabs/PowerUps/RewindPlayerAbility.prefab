@@ -157,7 +157,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: eb23c5bac8c53504780cd7d3d6e50f97, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  AbilitySoundName: RewindSound
+  abilitySoundName: RewindSound
+  abilitySoundVolume: 1
+  RewindParticleEffectOnPlayer: {fileID: 140696, guid: c01fe0f68e8174fc8b1d035896ca3626, type: 3}
 --- !u!114 &-731721861707100235
 MonoBehaviour:
   m_ObjectHideFlags: 0

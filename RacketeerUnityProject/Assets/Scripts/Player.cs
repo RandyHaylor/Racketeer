@@ -51,6 +51,7 @@ public class Player : NetworkBehaviour
     float rotateBoostAmount;//for passing temporary amounts, normally 0
 
     bool velocityBoostActive = false;
+    bool speedUpPowerupActive = false;
     float velocityBoostDuration = 0.1f;
     float velocityBoostCooldown = 1f;
     bool velocityBoostCoolingDown = false;
@@ -164,6 +165,7 @@ public class Player : NetworkBehaviour
 
             if (isLocalPlayer) boostFireParticleSys.Play();
             else RpcPlayerBoostParticles();
+            if (isLocalPlayer && isServer) RpcPlayerBoostParticles();
         }
 
 
@@ -172,12 +174,9 @@ public class Player : NetworkBehaviour
         directionalForce.y = rawPlayerInput.moveVertical;
 
 
-
-
-
         //if speed in the direction the user is pointing is below the speed limit, apply the movement force
-        if (Vector3.Dot(rb.velocity, directionalForce.normalized) < (GameManager.Instance.playerSpeedLimit * (velocityBoostActive ? GameManager.Instance.speedLimitBoostMultiplier : 1f)))
-            newPlayerInputForce.movement = directionalForce * GameManager.Instance.playerBaseMovementForce * (velocityBoostActive ? GameManager.Instance.velocityBoostMultiplier : 1f);
+        if (Vector3.Dot(rb.velocity, directionalForce.normalized) < (GameManager.Instance.playerSpeedLimit * (velocityBoostActive || speedUpPowerupActive ? GameManager.Instance.speedLimitBoostMultiplier : 1f)))
+            newPlayerInputForce.movement = directionalForce * GameManager.Instance.playerBaseMovementForce * (velocityBoostActive || speedUpPowerupActive ? GameManager.Instance.velocityBoostMultiplier : 1f);
         else
             newPlayerInputForce.movement = Vector3.zero;
 
@@ -231,6 +230,13 @@ public class Player : NetworkBehaviour
         rb.AddTorque(angularForce, ForceMode.Impulse);
     }
 
+    public void GrantBoostForSeconds(float boostTime) => StartCoroutine(GrantBoostForSecondsCoroutine(boostTime));
+    IEnumerator GrantBoostForSecondsCoroutine(float boostTime)
+    {
+        speedUpPowerupActive = true;
+        yield return new WaitForSeconds(boostTime);
+        speedUpPowerupActive = false;
+    }
     void RemovePlayerAbilityClientAndServer()
     {
         RemovePlayerAbility();
