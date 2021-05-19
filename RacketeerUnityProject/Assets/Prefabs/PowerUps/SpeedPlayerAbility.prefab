@@ -64,8 +64,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   abilitySoundName: SpeedUpSound
   abilitySoundVolume: 0.593
-  SpeedUpParticleEffectOnPlayer: {fileID: 7475739298808879458, guid: a6fee39770c87494185e66ae6ba15388, type: 3}
-  SpeedUpDuration: 1
+  SpeedUpDuration: 0.75
 --- !u!1001 &2040235196476370781
 PrefabInstance:
   m_ObjectHideFlags: 0

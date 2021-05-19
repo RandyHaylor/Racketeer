@@ -40,6 +40,7 @@ public class Player : NetworkBehaviour
     public float triggerDeadzone = 0.2f;
 
     public ParticleSystem boostFireParticleSys;
+    public ParticleSystem speedUpPowerUpParticleSys;
     public string PlayerBoostSoundClip;
 
     private PlayerInput localPlayerInputCache;
@@ -89,8 +90,15 @@ public class Player : NetworkBehaviour
         //Debug.Log(gameObject.name + " isLocalPLayer? " + isLocalPlayer + " netId: " + netId);
         //if (!isServer) return;
             //enforce maximum boosted speed limit on players
-        if (rb.velocity.sqrMagnitude > GameManager.Instance.speedLimitBoostMultiplier * GameManager.Instance.playerSpeedLimit * GameManager.Instance.speedLimitBoostMultiplier * GameManager.Instance.playerSpeedLimit)
-            rb.velocity = GameManager.Instance.speedLimitBoostMultiplier * GameManager.Instance.playerSpeedLimit * rb.velocity.normalized;
+        if (
+                rb.velocity.sqrMagnitude 
+                > 
+                (speedUpPowerupActive ? GameManager.Instance.speedLimitSpeedUpPowerUpMult : GameManager.Instance.speedLimitBoostMultiplier) 
+                * GameManager.Instance.playerSpeedLimit 
+                * (speedUpPowerupActive ? GameManager.Instance.speedLimitSpeedUpPowerUpMult : GameManager.Instance.speedLimitBoostMultiplier) 
+                * GameManager.Instance.playerSpeedLimit
+            )
+            rb.velocity = (speedUpPowerupActive ? GameManager.Instance.speedLimitSpeedUpPowerUpMult : GameManager.Instance.speedLimitBoostMultiplier) * GameManager.Instance.playerSpeedLimit * rb.velocity.normalized;
         if (rb.angularVelocity.sqrMagnitude > GameManager.Instance.angularSpeedLimitBoost * GameManager.Instance.angularSpeedLimitBoost)
             rb.angularVelocity = GameManager.Instance.angularSpeedLimitBoost * rb.velocity.normalized;            
     }
@@ -125,6 +133,7 @@ public class Player : NetworkBehaviour
     }
 
     [ClientRpc] void RpcPlayerBoostParticles() { if (!isLocalPlayer) boostFireParticleSys.Play(); }
+    [ClientRpc] void RpcPlayerSpeedUpParticles() { if (!isLocalPlayer) speedUpPowerUpParticleSys.Play(); }
 
     IEnumerator VelocityBoostTimer()
     {
@@ -164,8 +173,7 @@ public class Player : NetworkBehaviour
             if (isLocalPlayer) SoundManager.PlaySound(PlayerBoostSoundClip, transform.position, SoundManager.UsersToPlayFor.SelfLocallyThenEveryone);
 
             if (isLocalPlayer) boostFireParticleSys.Play();
-            else RpcPlayerBoostParticles();
-            if (isLocalPlayer && isServer) RpcPlayerBoostParticles();
+            if (isServer) RpcPlayerBoostParticles(); //plays on all clients except localPlayer
         }
 
 
@@ -175,8 +183,8 @@ public class Player : NetworkBehaviour
 
 
         //if speed in the direction the user is pointing is below the speed limit, apply the movement force
-        if (Vector3.Dot(rb.velocity, directionalForce.normalized) < (GameManager.Instance.playerSpeedLimit * (velocityBoostActive || speedUpPowerupActive ? GameManager.Instance.speedLimitBoostMultiplier : 1f)))
-            newPlayerInputForce.movement = directionalForce * GameManager.Instance.playerBaseMovementForce * (velocityBoostActive || speedUpPowerupActive ? GameManager.Instance.velocityBoostMultiplier : 1f);
+        if (Vector3.Dot(rb.velocity, directionalForce.normalized) < (GameManager.Instance.playerSpeedLimit *  (speedUpPowerupActive ? GameManager.Instance.speedLimitSpeedUpPowerUpMult : (velocityBoostActive ? GameManager.Instance.speedLimitBoostMultiplier : 1f))))
+            newPlayerInputForce.movement = directionalForce * GameManager.Instance.playerBaseMovementForce * (velocityBoostActive ? GameManager.Instance.velocityBoostMultiplier : 1f) * (speedUpPowerupActive ? GameManager.Instance.speedBoostSpeedUpPowerUpMult : 1f);
         else
             newPlayerInputForce.movement = Vector3.zero;
 
@@ -233,10 +241,20 @@ public class Player : NetworkBehaviour
     public void GrantBoostForSeconds(float boostTime) => StartCoroutine(GrantBoostForSecondsCoroutine(boostTime));
     IEnumerator GrantBoostForSecondsCoroutine(float boostTime)
     {
+        bool playAgain = false;
+        if (speedUpPowerupActive) playAgain = true; //handle speed up powerup used during a previous speed up powerup
+        
         speedUpPowerupActive = true;
+        
+        if (isLocalPlayer) speedUpPowerUpParticleSys.Play();
+        if (isServer) RpcPlayerSpeedUpParticles();
+
         yield return new WaitForSeconds(boostTime);
         speedUpPowerupActive = false;
+        if (playAgain) StartCoroutine(GrantBoostForSecondsCoroutine(boostTime));
     }
+
+
     void RemovePlayerAbilityClientAndServer()
     {
         RemovePlayerAbility();

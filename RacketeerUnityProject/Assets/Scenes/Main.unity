@@ -1398,9 +1398,11 @@ MonoBehaviour:
   velocityBoostMultiplier: 7
   rotationalBoostMultiplier: 6
   playerSpeedLimit: 5
-  playerBaseMovementForce: 7
+  playerBaseMovementForce: 9
   playerBaseAngularMovementForce: 1.5
   speedLimitBoostMultiplier: 2
+  speedLimitSpeedUpPowerUpMult: 2.5
+  speedBoostSpeedUpPowerUpMult: 2
   angularSpeedLimitBoost: 10
   angularSpeedLimitNormal: 6
   playerColors:
@@ -1418,14 +1420,25 @@ MonoBehaviour:
   wallsTransform: {fileID: 829605344}
   defaultRoundTime: 30
   defaultCountdownTime: 3
-  playerNumberOwningBall: -1
+  playerNumberOwningBall: 0
   playerExplosions:
   - {fileID: 105144, guid: c469495b89177b84981c5395bd66c191, type: 3}
   - {fileID: 105144, guid: c79f08e95d8f44c4b928725742e54a1d, type: 3}
   - {fileID: 105144, guid: 9776969b953216a4eadef4c84fa95423, type: 3}
   - {fileID: 105144, guid: e23b47552975d5e4a88c2d8556166d67, type: 3}
-  playerScores: 
+  playerScores: 09000000000000000000000000000000
   PlayerScoreOutput: {fileID: 225485478}
+  PlayerScoreTexts:
+  - {fileID: 1101374092}
+  - {fileID: 1871983849}
+  - {fileID: 2133015173}
+  - {fileID: 636817375}
+  PlayerScoreParticleSystems:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  PointGainedEffect: {fileID: 0}
   centerCountdownTextGameObject: {fileID: 728128773}
   CenterCountdownText: {fileID: 1392518792}
   RoundTimeInputField: {fileID: 2103550770}
@@ -2175,7 +2188,6 @@ GameObject:
   - component: {fileID: 236915581}
   - component: {fileID: 236915580}
   - component: {fileID: 236915579}
-  - component: {fileID: 236915578}
   m_Layer: 0
   m_Name: Timekeeper
   m_TagString: Untagged
@@ -2183,23 +2195,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &236915578
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 236915577}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0144e3ad8a88947298e2dca62625e6ca, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _localTimeScale: 1
-  _paused: 0
-  _parentKey: Root
-  _parentBlend: 0
-  _key: MusicAndCoins
 --- !u!114 &236915579
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2857,7 +2852,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _recordingInterval: 0.05
   _mode: 1
-  _globalClockKey: MusicAndCoins
+  _globalClockKey: BallAndPlayers
   _rewindable: 1
   _recordingDuration: 3
 --- !u!1 &359297842
@@ -4554,6 +4549,8 @@ MonoBehaviour:
   - {fileID: 4379796453127216234, guid: 2d6b59053265b7a4c90043d4e58fc01d, type: 3}
   - {fileID: 2184254436192047060, guid: ef27979e00293db4eb7f55e2e0f9c2fe, type: 3}
   - {fileID: 4379796453127216234, guid: 12bf170ed06556e49a70deb799088a15, type: 3}
+  - {fileID: 140696, guid: c01fe0f68e8174fc8b1d035896ca3626, type: 3}
+  - {fileID: 156124, guid: 6015178421825ab4e8b46c6a33d8c3ad, type: 3}
 --- !u!4 &652688028
 Transform:
   m_ObjectHideFlags: 0
@@ -13003,10 +13000,10 @@ MonoBehaviour:
   m_enableVertexGradient: 1
   m_colorMode: 2
   m_fontColorGradient:
-    topLeft: {r: 0.5896226, g: 1, b: 0.6475583, a: 1}
-    topRight: {r: 0.5896226, g: 1, b: 0.6475583, a: 1}
-    bottomLeft: {r: 0, g: 0.078431375, b: 0, a: 1}
-    bottomRight: {r: 0, g: 0.078431375, b: 0, a: 1}
+    topLeft: {r: 0, g: 0.6226415, b: 0.08790232, a: 1}
+    topRight: {r: 0, g: 0.6226415, b: 0.08790232, a: 1}
+    bottomLeft: {r: 0.5656023, g: 0, b: 1, a: 1}
+    bottomRight: {r: 0.5656023, g: 0, b: 1, a: 1}
   m_fontColorGradientPreset: {fileID: 0}
   m_spriteAsset: {fileID: 0}
   m_tintAllSprites: 0
@@ -16516,7 +16513,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 6.23}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 0, y: -9.38}
+  m_AnchoredPosition: {x: 0, y: -9.380005}
   m_SizeDelta: {x: 96.6, y: 71.5}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &2103898901

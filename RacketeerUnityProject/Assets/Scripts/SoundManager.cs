@@ -242,7 +242,7 @@ public class SoundManager : NetworkBehaviour
             //play sound directly
             //call command that calls clientRpc, but supress playback on me
             PlaySoundPrivate(audioClipName, position, volumeStrength, _instance.unreachableNetId, soundGroup);
-            CmdPlaySound(audioClipName, position, volumeStrength, _instance.GetComponent<NetworkBehaviour>().netId, soundGroup);
+            CmdPlaySound(audioClipName, position, volumeStrength, NetworkClient.localPlayer.netId, soundGroup);
         }
         else if (usersToPlayFor == UsersToPlayFor.SelfOnly)
         {
@@ -261,8 +261,8 @@ public class SoundManager : NetworkBehaviour
     [Command(requiresAuthority = false)] private void CmdPlaySound(string audioClipName, Vector3 position, float volumeStrength, uint netIdToExclude, SoundGroup soundGroup)
     {
         ClientRpcPlaySound(audioClipName, position, volumeStrength, netIdToExclude, soundGroup);
-        if (playSoundOnDedicatedServer && isServerOnly)
-            PlaySoundPrivate(audioClipName, position, volumeStrength, netIdToExclude, soundGroup);
+        if (!playSoundOnDedicatedServer && isServerOnly) return;
+        PlaySoundPrivate(audioClipName, position, volumeStrength, netIdToExclude, soundGroup);
     }
 
     //play a sound on all clients except netIdToExclude
@@ -274,7 +274,7 @@ public class SoundManager : NetworkBehaviour
         if (soundGroup == SoundGroup.Effects) currentAudioClipList = effectAudioClipList;
         else if (soundGroup == SoundGroup.Music) currentAudioClipList = musicAudioClipList;
 
-        if (netId == netIdToExclude) return;
+        if (!isServer && NetworkClient.localPlayer.netId == netIdToExclude) return;
 
         if (!_instance.currentAudioClipList.ClipList.Any(x => x.AudioClipName == audioClipName))
         {

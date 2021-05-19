@@ -44,6 +44,7 @@ Transform:
   - {fileID: 6149471599853063029}
   - {fileID: 4704923430703246034}
   - {fileID: 1089412864800143104}
+  - {fileID: 4365618871413086835}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -146,6 +147,7 @@ MonoBehaviour:
   stickDeadzone: 0.2
   triggerDeadzone: 0.2
   boostFireParticleSys: {fileID: 1089412864815346240}
+  speedUpPowerUpParticleSys: {fileID: 4365618871398932275}
   PlayerBoostSoundClip: PlayerBoostSound
 --- !u!114 &738613628260659456
 MonoBehaviour:
@@ -586,4 +588,75 @@ PrefabInstance:
 Transform:
   m_CorrespondingSourceObject: {fileID: 400000, guid: 9495c0e0a6314994d9bafd4aab0a8288, type: 3}
   m_PrefabInstance: {fileID: 6149471599853457909}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1001 &6569311992131641137
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 4245177431093541113}
+    m_Modifications:
+    - target: {fileID: 4741513783422063309, guid: a6fee39770c87494185e66ae6ba15388, type: 3}
+      propertyPath: m_AssetId
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 7475739298808579394, guid: a6fee39770c87494185e66ae6ba15388, type: 3}
+      propertyPath: m_RootOrder
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 7475739298808579394, guid: a6fee39770c87494185e66ae6ba15388, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7475739298808579394, guid: a6fee39770c87494185e66ae6ba15388, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7475739298808579394, guid: a6fee39770c87494185e66ae6ba15388, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7475739298808579394, guid: a6fee39770c87494185e66ae6ba15388, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7475739298808579394, guid: a6fee39770c87494185e66ae6ba15388, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7475739298808579394, guid: a6fee39770c87494185e66ae6ba15388, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7475739298808579394, guid: a6fee39770c87494185e66ae6ba15388, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7475739298808579394, guid: a6fee39770c87494185e66ae6ba15388, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7475739298808579394, guid: a6fee39770c87494185e66ae6ba15388, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7475739298808579394, guid: a6fee39770c87494185e66ae6ba15388, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7475739298808879458, guid: a6fee39770c87494185e66ae6ba15388, type: 3}
+      propertyPath: m_Name
+      value: SpeedUpBoostTrail
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: a6fee39770c87494185e66ae6ba15388, type: 3}
+--- !u!4 &4365618871413086835 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 7475739298808579394, guid: a6fee39770c87494185e66ae6ba15388, type: 3}
+  m_PrefabInstance: {fileID: 6569311992131641137}
+  m_PrefabAsset: {fileID: 0}
+--- !u!198 &4365618871398932275 stripped
+ParticleSystem:
+  m_CorrespondingSourceObject: {fileID: 7475739298822733826, guid: a6fee39770c87494185e66ae6ba15388, type: 3}
+  m_PrefabInstance: {fileID: 6569311992131641137}
   m_PrefabAsset: {fileID: 0}

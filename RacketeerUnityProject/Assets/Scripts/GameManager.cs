@@ -6,6 +6,7 @@ using TMPro;
 using UnityEngine.UI;
 using UnityEngine.Audio;
 using UnityEngine.Serialization;
+using Coffee.UIExtensions;
 
 public class GameManager : NetworkBehaviour
 {
@@ -15,7 +16,9 @@ public class GameManager : NetworkBehaviour
     public float playerSpeedLimit = 5f;
     public float playerBaseMovementForce = 2;
     public float playerBaseAngularMovementForce = 2;
-    public float speedLimitBoostMultiplier;
+    public float speedLimitBoostMultiplier = 2;
+    public float speedLimitSpeedUpPowerUpMult = 3;
+    public float speedBoostSpeedUpPowerUpMult = 3;
     public float angularSpeedLimitBoost = 10f;
     public float angularSpeedLimitNormal = 4f;
 
@@ -45,6 +48,12 @@ public class GameManager : NetworkBehaviour
     public List<int> playerScores;
 
     public TMP_Text PlayerScoreOutput;
+
+    public TMP_Text[] PlayerScoreTexts;
+    private float[] scorePanelXs;
+    public ParticleSystem[] PlayerScoreParticleSystems;
+
+    public GameObject PointGainedEffect;
 
     public GameObject centerCountdownTextGameObject;
     public TMP_Text CenterCountdownText;
@@ -82,6 +91,11 @@ public class GameManager : NetworkBehaviour
     {
         _instance = this;
         networkManager = FindObjectOfType<NetworkManager>();
+        scorePanelXs = new float[4];
+        for (int i = 0; i < scorePanelXs.Length; i++)
+        {
+            scorePanelXs[i] = PlayerScoreTexts[i].rectTransform.parent.gameObject.GetComponent<RectTransform>().position.x;
+        }
     }
 
     [Server]
@@ -99,6 +113,7 @@ public class GameManager : NetworkBehaviour
         RoundStartBtn.onClick.AddListener(StartNewRound);
         Debug.Log("Called Server Start()");
         StartCoroutine(RandomizeGravity(randomizeGravityMinSeconds, randomizeGravityMaxSeconds));
+        ResetPlayerScores();
     }
 
     /*
@@ -493,30 +508,80 @@ public class GameManager : NetworkBehaviour
             SoundManager.PlaySound(PointGainedSound);
             playerScores[playerNumberOwningBall] += 1;
             UpdatePlayerScores();
+
+            ShowPointGainedEffect(playerNumberOwningBall);
+            RpcShowPointGainedEffect(playerNumberOwningBall);
+
+
             if (levelActive)
                 levelManager.CoinCollected();
+
         }
 
     }
+
+    [ClientRpc] private void RpcShowPointGainedEffect(int playerNumber) { if (!isServer) ShowPointGainedEffect(playerNumber); }
+    private void ShowPointGainedEffect(int playerNumber)
+    {
+        StartCoroutine(WigglePlayerscore(playerNumber));
+    }
+
+    IEnumerator WigglePlayerscore(int playerNumber)
+    {
+        float duration = 2;
+        float wiggleStrength = 6f;
+        float startTime = Time.time;
+        float timeElapsed = 0;
+        RectTransform rt = PlayerScoreTexts[playerNumber].rectTransform.parent.gameObject.GetComponent<RectTransform>();
+        Vector3 pos = rt.position;
+        float startX = scorePanelXs[playerNumber];
+        Vector3 startScale = Vector3.one;
+        Image image = PlayerScoreTexts[playerNumber].rectTransform.parent.gameObject.GetComponent<Image>();
+        Color startColor = image.color;
+        float startAlpha = 0.4196f;
+        Color currColor = new Color(image.color.r, image.color.g, image.color.b, 1);
+
+        while (timeElapsed < duration)
+        {
+            pos.x = startX + Mathf.Sin(Time.time * 40) * Mathf.SmoothStep(wiggleStrength, 0, timeElapsed/duration);
+            rt.position = pos;
+            rt.localScale = startScale * (1 + (0.5f * ((duration-timeElapsed)/duration)));
+            currColor.a = Mathf.SmoothStep(1, startAlpha, timeElapsed / duration);
+            image.color = currColor;
+            timeElapsed += Time.deltaTime;
+            yield return new WaitForEndOfFrame();
+        }
+        pos.x = startX;
+        rt.position = pos;
+        rt.localScale = startScale;
+        startColor.a = startAlpha;
+        image.color = startColor;
+    }
+
+
+
+
+
+
     [Server]
     private void UpdatePlayerScores()
     {
-        string playerScoreString = "";
-        for (int i = 0; i < NetworkManager.singleton.maxConnections; i++)
-        {
-            playerScoreString += "Player " + (i+1).ToString() + ": " + playerScores[i]+"   ";
-        }
-
-        playerScoreString.TrimEnd(' ');
-
-        PlayerScoreOutput.text = playerScoreString;
-        UpdateClientScoreText(playerScoreString);
+         UpdateClientScoreText(playerScores[0], playerScores[1], playerScores[2], playerScores[3]);
     }
     [ClientRpc]
-    private void UpdateClientScoreText(string playerScoreString)
+    private void UpdateClientScoreText(int p1, int p2, int p3, int p4)
     {
-        PlayerScoreOutput.text = playerScoreString;
+        PlayerScoreTexts[0].text = p1.ToString();
+        PlayerScoreTexts[1].text = p2.ToString();
+        PlayerScoreTexts[2].text = p3.ToString();
+        PlayerScoreTexts[3].text = p4.ToString();
     }
+    [ClientRpc] private void RpcUpdateClientPlayerScore(int playerNumber, int newScore, Vector3 pointOrigination) //TODO
+    {
+        //startcoroutine... show shrinking line from asteroid explosion to player score instantly, fading away quickly
+        //use playerNumber to update player scores tmp text array
+    }
+
 
 
         //if I switch to key frame updates vs a flow of updates, I might get away with multiple balls, but it might break sync
