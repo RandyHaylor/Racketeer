@@ -6,7 +6,6 @@ using TMPro;
 using UnityEngine.UI;
 using UnityEngine.Audio;
 using UnityEngine.Serialization;
-using Coffee.UIExtensions;
 
 public class GameManager : NetworkBehaviour
 {
